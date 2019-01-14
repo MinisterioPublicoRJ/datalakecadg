@@ -83,6 +83,7 @@ class TestCPF(TestCase):
         )
 
         self.assertEquals(response.status_code, 201)
+        self.assertEquals(response.json()['md5'], contents_md5)
 
     def test_file_post_wrong_md5(self):
         contents = b'filecontents'
