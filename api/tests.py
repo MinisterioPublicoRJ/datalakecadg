@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.test import RequestFactory, TestCase
-from .decorators import securedecorator
+from .utils import securedecorator
 
 # Create your tests here.
 
