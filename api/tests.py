@@ -1,7 +1,9 @@
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
-from .utils import securedecorator
+from hashlib import md5
+from .utils import securedecorator, md5reader
 
 # Create your tests here.
 
@@ -34,3 +36,28 @@ class TestSecureDecorator(TestCase):
         )
         
         postmethod(request=fakerequest)
+
+
+class TestMd5Reader(TestCase):
+    def test_hexdigest(self):
+        contents = b'filecontents'
+        uploadedfile = SimpleUploadedFile(
+            'file',
+            contents
+        )
+
+        self.assertEquals(
+            md5reader(uploadedfile),
+            md5(contents).hexdigest()
+        )
+
+    def test_wronghexdigest(self):
+        uploadedfile = SimpleUploadedFile(
+            'file',
+            b'filecontents'
+        )
+
+        self.assertNotEquals(
+            md5reader(uploadedfile),
+            md5(b'lerolero').hexdigest()
+        )
