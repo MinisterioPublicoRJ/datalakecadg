@@ -112,4 +112,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+HDFS_URL = config('HDFS_URL')
+HDFS_USER = config('HDFS_USER')
 SECRET = config('SECRET')
+METHOD_MAP = config('METHOD_MAP')

@@ -64,7 +64,7 @@ class TestMd5Reader(TestCase):
             md5(b'lerolero').hexdigest()
         )
 
-class TestCPF(TestCase):
+class TestUpload(TestCase):
     def test_file_post(self):
         contents = b'filecontents'
 
@@ -74,7 +74,7 @@ class TestCPF(TestCase):
         contents_file.seek(0)
 
         response = self.client.post(
-            reverse('api-cpf'),
+            reverse('api-upload'),
             {
                 'SECRET': settings.SECRET,
                 'md5': contents_md5,
@@ -94,7 +94,7 @@ class TestCPF(TestCase):
         contents_file.seek(0)
 
         response = self.client.post(
-            reverse('api-cpf'),
+            reverse('api-upload'),
             {
                 'SECRET': settings.SECRET,
                 'md5': 'wrongmd5',

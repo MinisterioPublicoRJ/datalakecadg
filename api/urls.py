@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import cpf
+from .views import upload
 
 urlpatterns = [
-    path('cpf/', cpf, name='api-cpf')
+    path('upload/', upload, name='api-upload')
 ]

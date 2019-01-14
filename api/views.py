@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from .hdfsclient import hdfsclient
+from .clients import hdfsclient
 from .utils import md5reader
 
 
@@ -9,7 +9,7 @@ BASE_RETURN = {
 }
 
 
-def cpf(request):
+def upload(request):
     file = request.FILES['file']
     BASE_RETURN['md5'] = md5reader(file)
 
