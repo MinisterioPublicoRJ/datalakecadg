@@ -21,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -112,7 +112,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-HDFS_URL = config('HDFS_URL')
-HDFS_USER = config('HDFS_USER')
-SECRET = config('SECRET')
-METHOD_MAP = config('METHOD_MAP')
+if 'RUNTIME' in os.environ:
+    SECRET_KEY = config('SECRET_KEY')
+    HDFS_URL = config('HDFS_URL')
+    HDFS_USER = config('HDFS_USER')
+    SECRET = config('SECRET')
+    METHOD_MAP = config('METHOD_MAP')
