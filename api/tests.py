@@ -54,6 +54,8 @@ class TestMd5Reader(TestCase):
             md5(contents).hexdigest()
         )
 
+        self.assertEqual(uploadedfile.tell(), 0)
+
     def test_wronghexdigest(self):
         uploadedfile = SimpleUploadedFile(
             'file',
