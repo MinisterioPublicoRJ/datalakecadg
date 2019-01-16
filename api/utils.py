@@ -25,5 +25,5 @@ def md5reader(uploadedfile):
     for chunk in uploadedfile.chunks():
         hash_md5.update(chunk)
 
-    uploadedfile.seek(0)
+    uploadedfile.file.seek(0)
     return hash_md5.hexdigest()
