@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from os import path
 from .clients import hdfsclient, methodmap
-from .utils import md5reader
+from .utils import md5reader, securedecorator
 
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,9 @@ def upload_to_hdfs(file, filename, destination):
     )
 
 
+@securedecorator
 def upload(request):
+    import ipdb; ipdb.set_trace()
     file = request.FILES['file']
     method = request.POST.get('method')
     filename = request.POST.get('filename')
