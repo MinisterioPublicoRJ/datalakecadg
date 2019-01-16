@@ -22,7 +22,6 @@ def upload_to_hdfs(file, filename, destination):
 
 @securedecorator
 def upload(request):
-    import ipdb; ipdb.set_trace()
     file = request.FILES['file']
     method = request.POST.get('method')
     filename = request.POST.get('filename')
