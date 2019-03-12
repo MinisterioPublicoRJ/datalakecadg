@@ -12,7 +12,8 @@ def securedecorator(func):
     def wrapper(*args, **kwargs):
         request = args[0]
 
-        if 'SECRET' in request.POST and request.POST.get('SECRET') == settings.SECRET:
+        if 'SECRET' in request.POST\
+           and request.POST.get('SECRET') == settings.SECRET:
             return func(*args, **kwargs)
 
         raise PermissionDenied

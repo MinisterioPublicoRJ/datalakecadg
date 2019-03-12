@@ -1,18 +1,20 @@
+from hashlib import md5
+from io import BytesIO
+from unittest import mock
+
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-from hashlib import md5
-from io import BytesIO
-from unittest import mock
-from .utils import securedecorator, md5reader
 
-# Create your tests here.
+from api.utils import securedecorator, md5reader
+
 
 @securedecorator
 def postmethod(request):
     pass
+
 
 class TestSecureDecorator(TestCase):
     def test_secure_empty_key(self):
@@ -26,18 +28,16 @@ class TestSecureDecorator(TestCase):
             '',
             data={'SECRET': 'wrongkey'}
         )
-        
 
         with self.assertRaises(PermissionDenied):
             postmethod(request=fakerequest)
-
 
     def test_secure(self):
         fakerequest = RequestFactory().post(
             '',
             data={'SECRET': settings.SECRET}
         )
-        
+
         postmethod(request=fakerequest)
 
 
@@ -66,6 +66,7 @@ class TestMd5Reader(TestCase):
             md5reader(uploadedfile),
             md5(b'lerolero').hexdigest()
         )
+
 
 class TestUpload(TestCase):
     @mock.patch('api.views.upload_to_hdfs')
