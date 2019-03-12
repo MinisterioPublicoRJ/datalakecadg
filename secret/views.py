@@ -19,3 +19,9 @@ def create_secret(request):
 def list_secret(request):
     context = {'secrets': Secret.objects.all()}
     return render(request, 'secret/list-secret.html', context)
+
+
+def delete_secret(request, pk):
+    context = {'pk': pk}
+    if request.method == 'GET':
+        return render(request, 'secret/delete-confirmation.html', context)

@@ -48,3 +48,13 @@ class SecretList(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'secret/list-secret.html')
         self.assertEqual(resp.context['secrets'].count(), 2)
+
+
+class SecretDelete(TestCase):
+    def test_delete_secret_confirmation(self):
+        url = reverse('secret:delete-secret', kwargs={'pk': 2})
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'secret/delete-confirmation.html')
+        self.assertEqual(resp.context['pk'], '2')
