@@ -1,3 +1,4 @@
+from django.contrib.messages import get_messages
 from django.urls import reverse
 from django.test import TestCase
 from freezegun import freeze_time
@@ -26,3 +27,12 @@ class SecretView(TestCase):
         self.assertEqual(user.username, 'anyname')
         self.assertEqual(user.email, 'any@email.com')
         self.assertEqual(user.secret_key, 'd3a4646728a9de9a74d8fc4c41966a42')
+
+    def test_template_used(self):
+        url = reverse('secret:create-secret')
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'secret/create-secret.html')
+        messages = [m.message for m in get_messages(resp.wsgi_request)]
+        self.assertIn('Chave criada com sucesso', messages)
