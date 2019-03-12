@@ -2,6 +2,7 @@ from django.contrib.messages import get_messages
 from django.urls import reverse
 from django.test import TestCase
 from freezegun import freeze_time
+from model_mommy.mommy import make
 
 from secret.models import Secret
 
@@ -36,3 +37,14 @@ class SecretView(TestCase):
         self.assertTemplateUsed(resp, 'secret/create-secret.html')
         messages = [m.message for m in get_messages(resp.wsgi_request)]
         self.assertIn('Chave criada com sucesso', messages)
+
+
+class SecretList(TestCase):
+    def test_correct_response(self):
+        make(Secret, _quantity=2)
+        url = reverse('secret:list-secret')
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'secret/list-secret.html')
+        self.assertEqual(resp.context['secrets'].count(), 2)

@@ -1,8 +1,9 @@
 from django.contrib import messages
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 
 from secret.forms import SecretForm
+from secret.models import Secret
 
 
 def create_secret(request):
@@ -13,3 +14,8 @@ def create_secret(request):
 
     context = {'form': form}
     return render(request, 'secret/create-secret.html', context)
+
+
+def list_secret(request):
+    context = {'secrets': Secret.objects.all()}
+    return render(request, 'secret/list-secret.html', context)
