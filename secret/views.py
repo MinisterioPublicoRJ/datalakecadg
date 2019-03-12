@@ -1,6 +1,5 @@
 from django.contrib import messages
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 
 from secret.forms import SecretForm
 from secret.models import Secret
@@ -22,6 +21,10 @@ def list_secret(request):
 
 
 def delete_secret(request, pk):
-    context = {'pk': pk}
-    if request.method == 'GET':
-        return render(request, 'secret/delete-confirmation.html', context)
+    secret = get_object_or_404(Secret, id=int(pk))
+    if request.method == 'POST':
+        secret.delete()
+        return redirect('secret:list-secret')
+
+    context = {'pk': pk, 'username': secret.username}
+    return render(request, 'secret/delete-confirmation.html', context)

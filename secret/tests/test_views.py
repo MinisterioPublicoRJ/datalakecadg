@@ -52,9 +52,22 @@ class SecretList(TestCase):
 
 class SecretDelete(TestCase):
     def test_delete_secret_confirmation(self):
+        make('secret.Secret', id=1)
+        s2 = make('secret.Secret', id=2)
         url = reverse('secret:delete-secret', kwargs={'pk': 2})
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'secret/delete-confirmation.html')
         self.assertEqual(resp.context['pk'], '2')
+        self.assertEqual(resp.context['username'], s2.username)
+
+    def test_delete_secret(self):
+        make('secret.Secret', id=1)
+        make('secret.Secret', id=2)
+        url = reverse('secret:delete-secret', kwargs={'pk': 2})
+
+        resp = self.client.post(url)
+
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(Secret.objects.count(), 1)
