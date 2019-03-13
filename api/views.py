@@ -32,6 +32,8 @@ def get_destination(username, method):
     if dest.exists():
         return path.join(dest.first().uri, username)
 
+    raise PermissionDenied()
+
 
 @securedecorator
 def upload(request):

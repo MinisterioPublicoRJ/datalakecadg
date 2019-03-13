@@ -44,6 +44,36 @@ class TestUpload(TestCase):
         self.assertEqual(dest, '/path/to/storage/cpf/' + secret.username)
 
     @mock.patch('api.views.upload_to_hdfs')
+    def test_user_now_allowed_in_method(self, upload_to_hdfs):
+        contents = b'filecontents'
+
+        contents_md5 = md5(contents).hexdigest()
+        contents_file = BytesIO()
+        contents_file.write(contents)
+        contents_file.seek(0)
+
+        secret = make('secret.Secret', username='anyname')
+        make(
+            'methodmapping.MethodMapping',
+            method='cpf',
+            uri='/path/to/storage/cpf'
+        )
+
+        response = self.client.post(
+            reverse('api-upload'),
+            {
+                'SECRET': secret.secret_key,
+                'nome': secret.username,
+                'md5': contents_md5,
+                'method': 'cpf',
+                'file': contents_file,
+                'filename': 'filename'
+            }
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    @mock.patch('api.views.upload_to_hdfs')
     def test_file_post_wrong_md5(self, upload_to_hdfs):
         contents = b'filecontents'
 
