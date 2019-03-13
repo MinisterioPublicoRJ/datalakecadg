@@ -3,4 +3,8 @@ from django.contrib import admin
 from secret.models import Secret
 
 
-admin.site.register(Secret)
+class SecretAdmin(admin.ModelAdmin):
+    readonly_fields = ['secret_key']
+
+
+admin.site.register(Secret, SecretAdmin)
