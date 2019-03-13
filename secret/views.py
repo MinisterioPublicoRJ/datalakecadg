@@ -7,11 +7,12 @@ from secret.models import Secret
 
 def create_secret(request):
     form = SecretForm(request.POST or None)
+    context = {'form': form}
     if form.is_valid():
         form.save()
+        context['created_secret'] = Secret.objects.last().secret_key
         messages.success(request, 'Chave criada com sucesso!')
 
-    context = {'form': form}
     return render(request, 'secret/create-secret.html', context)
 
 
