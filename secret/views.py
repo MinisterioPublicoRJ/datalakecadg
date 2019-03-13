@@ -21,7 +21,7 @@ def list_secret(request):
 
 
 def delete_secret(request, pk):
-    secret = get_object_or_404(Secret, id=int(pk))
+    secret = get_object_or_404(Secret, id=pk)
     if request.method == 'POST':
         secret.delete()
         return redirect('secret:list-secret')

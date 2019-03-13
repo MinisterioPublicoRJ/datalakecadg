@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.contrib.messages import get_messages
 from django.urls import reverse
 from django.test import TestCase
@@ -52,20 +54,24 @@ class SecretList(TestCase):
 
 class SecretDelete(TestCase):
     def test_delete_secret_confirmation(self):
-        make('secret.Secret', id=1)
-        s2 = make('secret.Secret', id=2)
-        url = reverse('secret:delete-secret', kwargs={'pk': 2})
+        id_1 = uuid4().hex
+        id_2 = uuid4().hex
+        make('secret.Secret', id=id_1)
+        s2 = make('secret.Secret', id=id_2)
+        url = reverse('secret:delete-secret', kwargs={'pk': id_2})
         resp = self.client.get(url)
 
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'secret/delete-confirmation.html')
-        self.assertEqual(resp.context['pk'], '2')
+        self.assertEqual(resp.context['pk'], id_2)
         self.assertEqual(resp.context['username'], s2.username)
 
     def test_delete_secret(self):
-        make('secret.Secret', id=1)
-        make('secret.Secret', id=2)
-        url = reverse('secret:delete-secret', kwargs={'pk': 2})
+        id_1 = uuid4().hex
+        id_2 = uuid4().hex
+        make('secret.Secret', id=id_1)
+        make('secret.Secret', id=id_2)
+        url = reverse('secret:delete-secret', kwargs={'pk': id_2})
 
         resp = self.client.post(url)
 
