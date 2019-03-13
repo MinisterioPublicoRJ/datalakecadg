@@ -30,6 +30,10 @@ class SecretView(TestCase):
         self.assertEqual(user.username, 'anyname')
         self.assertEqual(user.email, 'any@email.com')
         self.assertEqual(user.secret_key, 'd3a4646728a9de9a74d8fc4c41966a42')
+        self.assertEqual(
+            resp.context['created_secret'],
+            'd3a4646728a9de9a74d8fc4c41966a42'
+        )
         messages = [m.message for m in get_messages(resp.wsgi_request)]
         self.assertIn('Chave criada com sucesso!', messages)
 
