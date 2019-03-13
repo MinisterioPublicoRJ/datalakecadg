@@ -41,7 +41,7 @@ class TestUpload(TestCase):
         self.assertEquals(response.json()['md5'], contents_md5)
         filename, dest = upload_to_hdfs.call_args[0][1:]
         self.assertEqual(filename, 'filename')
-        self.assertEqual(dest, '/path/to/storage/cpf')
+        self.assertEqual(dest, '/path/to/storage/cpf/' + secret.username)
 
     @mock.patch('api.views.upload_to_hdfs')
     def test_file_post_wrong_md5(self, upload_to_hdfs):

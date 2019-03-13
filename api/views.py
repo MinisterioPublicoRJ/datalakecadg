@@ -1,8 +1,11 @@
 import logging
+
+from os import path
+
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import render
-from os import path
+
 from .clients import hdfsclient, methodmap
 from .utils import md5reader, securedecorator
 
@@ -28,7 +31,7 @@ def get_destination(username, method):
         method=method
     )
     if dest.exists():
-        return dest.first().uri
+        return path.join(dest.first().uri, username)
 
 
 @securedecorator
