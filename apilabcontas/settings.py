@@ -12,9 +12,10 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 from decouple import config
+from unipath import Path
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -58,7 +59,7 @@ ROOT_URLCONF = 'apilabcontas.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR.child('templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
