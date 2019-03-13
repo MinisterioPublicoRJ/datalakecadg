@@ -4,9 +4,8 @@ from os import path
 
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
-from django.shortcuts import render
 
-from .clients import hdfsclient, methodmap
+from .clients import hdfsclient
 from .utils import md5reader, securedecorator
 
 from methodmapping.models import MethodMapping
