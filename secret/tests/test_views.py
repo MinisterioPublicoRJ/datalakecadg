@@ -30,6 +30,8 @@ class SecretView(TestCase):
         self.assertEqual(user.username, 'anyname')
         self.assertEqual(user.email, 'any@email.com')
         self.assertEqual(user.secret_key, 'd3a4646728a9de9a74d8fc4c41966a42')
+        messages = [m.message for m in get_messages(resp.wsgi_request)]
+        self.assertIn('Chave criada com sucesso!', messages)
 
     def test_template_used(self):
         url = reverse('secret:create-secret')
@@ -37,8 +39,6 @@ class SecretView(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'secret/create-secret.html')
-        messages = [m.message for m in get_messages(resp.wsgi_request)]
-        self.assertIn('Chave criada com sucesso', messages)
 
 
 class SecretList(TestCase):
