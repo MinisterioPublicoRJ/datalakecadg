@@ -2,9 +2,9 @@ from hashlib import md5
 from io import BytesIO
 from unittest import mock
 
-from django.conf import settings
 from django.urls import reverse
 from django.test import TestCase
+from model_mommy.mommy import make
 
 
 class TestUpload(TestCase):
@@ -17,10 +17,13 @@ class TestUpload(TestCase):
         contents_file.write(contents)
         contents_file.seek(0)
 
+        secret = make('secret.Secret', username='anyname')
+
         response = self.client.post(
             reverse('api-upload'),
             {
-                'SECRET': settings.SECRET,
+                'SECRET': secret.secret_key,
+                'nome': secret.username,
                 'md5': contents_md5,
                 'method': 'cpf',
                 'file': contents_file
@@ -40,10 +43,13 @@ class TestUpload(TestCase):
         contents_file.write(contents)
         contents_file.seek(0)
 
+        secret = make('secret.Secret', username='anyname')
+
         response = self.client.post(
             reverse('api-upload'),
             {
-                'SECRET': settings.SECRET,
+                'SECRET': secret.secret_key,
+                'nome': secret.username,
                 'md5': 'wrongmd5',
                 'method': 'cpf',
                 'file': contents_file

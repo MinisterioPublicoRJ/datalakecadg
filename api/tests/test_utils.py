@@ -1,9 +1,9 @@
 from hashlib import md5
 
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
+from model_mommy.mommy import make
 
 from api.utils import securedecorator, md5reader
 
@@ -20,19 +20,56 @@ class TestSecureDecorator(TestCase):
         with self.assertRaises(PermissionDenied):
             postmethod(request=fakerequest)
 
-    def test_secure_wrong_key(self):
+    def test_empty_username(self):
+        secret = make('secret.Secret', username='anyname')
         fakerequest = RequestFactory().post(
             '',
-            data={'SECRET': 'wrongkey'}
+            data={'SECRET': secret.secret_key}
+        )
+
+        with self.assertRaises(PermissionDenied):
+            postmethod(fakerequest)
+
+    def test_secure_wrong_key(self):
+        make(
+            'secret.Secret',
+            username='anyname',
+        )
+        fakerequest = RequestFactory().post(
+            '',
+            data={
+                'nome': 'anyname',
+                'SECRET': 'wrongkey'
+            }
+        )
+
+        with self.assertRaises(PermissionDenied):
+            postmethod(request=fakerequest)
+
+    def test_secure_user_doesnt_match_secret(self):
+        make(
+            'secret.Secret',
+            username='anyname',
+        )
+        fakerequest = RequestFactory().post(
+            '',
+            data={
+                'nome': 'othername',
+                'SECRET': 'aaaabbbcc'
+            }
         )
 
         with self.assertRaises(PermissionDenied):
             postmethod(request=fakerequest)
 
     def test_secure(self):
+        secret = make(
+            'secret.Secret',
+            username='anyname',
+        )
         fakerequest = RequestFactory().post(
             '',
-            data={'SECRET': settings.SECRET}
+            data={'nome': secret.username, 'SECRET': secret.secret_key}
         )
 
         postmethod(request=fakerequest)
