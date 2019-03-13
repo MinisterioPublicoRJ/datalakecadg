@@ -40,6 +40,18 @@ class SecretView(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'secret/create-secret.html')
 
+    def test_dont_duplicate_secret_user(self):
+        make(Secret, username='anyname')
+        url = reverse('secret:create-secret')
+        data = {
+            'username': 'anyname',
+            'email': 'any@email.com'
+        }
+        resp = self.client.post(url, data=data)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('Usuário já existe!'.encode(), resp.content)
+
 
 class SecretList(TestCase):
     def test_correct_response(self):

@@ -7,7 +7,7 @@ from secret.utils import create_secret
 
 class Secret(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    username = models.CharField(max_length=255)
+    username = models.CharField(max_length=255, unique=True)
     email = models.EmailField()
     secret_key = models.CharField(max_length=32)
 
