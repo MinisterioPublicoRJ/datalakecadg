@@ -18,6 +18,12 @@ class TestUpload(TestCase):
         contents_file.seek(0)
 
         secret = make('secret.Secret', username='anyname')
+        mmap = make(
+            'methodmapping.MethodMapping',
+            method='cpf',
+            uri='/path/to/storage/cpf'
+        )
+        mmap.secrets.add(secret)
 
         response = self.client.post(
             reverse('api-upload'),
@@ -26,13 +32,16 @@ class TestUpload(TestCase):
                 'nome': secret.username,
                 'md5': contents_md5,
                 'method': 'cpf',
-                'file': contents_file
+                'file': contents_file,
+                'filename': 'filename'
             }
         )
 
         self.assertEquals(response.status_code, 201)
         self.assertEquals(response.json()['md5'], contents_md5)
-        upload_to_hdfs.assert_called_once()
+        filename, dest = upload_to_hdfs.call_args[0][1:]
+        self.assertEqual(filename, 'filename')
+        self.assertEqual(dest, '/path/to/storage/cpf')
 
     @mock.patch('api.views.upload_to_hdfs')
     def test_file_post_wrong_md5(self, upload_to_hdfs):

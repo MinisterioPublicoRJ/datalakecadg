@@ -1,10 +1,12 @@
 import logging
+from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import render
 from os import path
 from .clients import hdfsclient, methodmap
 from .utils import md5reader, securedecorator
 
+from methodmapping.models import MethodMapping
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +22,19 @@ def upload_to_hdfs(file, filename, destination):
     )
 
 
+def get_destination(username, method):
+    dest = MethodMapping.objects.filter(
+        secrets__username=username,
+        method=method
+    )
+    if dest.exists():
+        return dest.first().uri
+
+
 @securedecorator
 def upload(request):
     file = request.FILES['file']
+    username = request.POST.get('nome')
     method = request.POST.get('method')
     filename = request.POST.get('filename')
     sent_md5 = request.POST.get('md5')
@@ -33,7 +45,7 @@ def upload(request):
         logger.error('%s presented MD5 checksum error' % filename)
         return JsonResponse(BASE_RETURN, status=500)
 
-    destination = methodmap[method]
+    destination = get_destination(username, method)
 
     upload_to_hdfs(file.file, filename, destination)
 
