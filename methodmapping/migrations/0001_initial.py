@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('secret', '0002_auto_20190313_1326'),
+        ('secret', '0001_initial'),
     ]
 
     operations = [
