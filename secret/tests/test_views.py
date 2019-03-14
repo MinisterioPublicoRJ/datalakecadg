@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
 from django.urls import reverse
 from django.test import TestCase
@@ -10,6 +11,13 @@ from secret.models import Secret
 
 
 class SecretView(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        User.objects.create_user(
+            'anyuser', 'anyuser@email.com', 'anypwd'
+        )
+        self.client.login(username='anyuser', password='anypwd')
+
     def test_correct_response(self):
         url = reverse('secret:create-secret')
         resp = self.client.get(url)
@@ -56,8 +64,23 @@ class SecretView(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn('Usuário já existe!'.encode(), resp.content)
 
+    def test_login_required(self):
+        # Log user out
+        self.client.logout()
+        url = reverse('secret:create-secret')
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 302)
+
 
 class SecretList(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        User.objects.create_user(
+            'anyuser', 'anyuser@email.com', 'anypwd'
+        )
+        self.client.login(username='anyuser', password='anypwd')
+
     def test_correct_response(self):
         make(Secret, _quantity=2)
         url = reverse('secret:list-secret')
@@ -67,8 +90,22 @@ class SecretList(TestCase):
         self.assertTemplateUsed(resp, 'secret/list-secret.html')
         self.assertEqual(resp.context['secrets'].count(), 2)
 
+    def test_login_required(self):
+        self.client.logout()
+        url = reverse('secret:list-secret')
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 302)
+
 
 class SecretDelete(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        User.objects.create_user(
+            'anyuser', 'anyuser@email.com', 'anypwd'
+        )
+        self.client.login(username='anyuser', password='anypwd')
+
     def test_delete_secret_confirmation(self):
         id_1 = uuid4().hex
         id_2 = uuid4().hex
@@ -93,3 +130,11 @@ class SecretDelete(TestCase):
 
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(Secret.objects.count(), 1)
+
+    def test_login_required(self):
+        self.client.logout()
+        id_1 = uuid4().hex
+        url = reverse('secret:delete-secret', kwargs={'pk': id_1})
+        resp = self.client.get(url)
+
+        self.assertEqual(resp.status_code, 302)
