@@ -149,6 +149,8 @@ LOGGING = {
 }
 
 
+LOGIN_REDIRECT_URL = 'secret:list-secret'
+
 if 'RUNTIME' in os.environ:
     SECRET_KEY = config('SECRET_KEY')
     HDFS_URL = config('HDFS_URL')
