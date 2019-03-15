@@ -1,8 +1,9 @@
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_http_methods
 from functools import wraps
 from hashlib import md5
+
+from secret.models import Secret
 
 
 def securedecorator(func):
@@ -12,7 +13,9 @@ def securedecorator(func):
     def wrapper(*args, **kwargs):
         request = args[0]
 
-        if 'SECRET' in request.POST and request.POST.get('SECRET') == settings.SECRET:
+        username = request.POST.get('nome', -1)
+        secret = request.POST.get('SECRET', -1)
+        if Secret.objects.filter(username=username, secret_key=secret):
             return func(*args, **kwargs)
 
         raise PermissionDenied
