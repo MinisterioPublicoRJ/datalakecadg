@@ -4,6 +4,7 @@ from os import path
 
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from .clients import hdfsclient
 from .utils import md5reader, securedecorator
@@ -36,6 +37,7 @@ def get_destination(username, method):
 
 
 @securedecorator
+@csrf_exempt
 def upload(request):
     file = request.FILES['file']
     username = request.POST.get('nome')
