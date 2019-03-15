@@ -20,4 +20,6 @@ class Secret(models.Model):
         verbose_name_plural = 'Users and Secret Keys'
 
     def __str__(self):
-        return f'{self.username} - {self.email}'
+        return '{username} - {email}'.format(
+            username=self.username, email=self.email
+            )
