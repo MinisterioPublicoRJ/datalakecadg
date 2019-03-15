@@ -9,4 +9,4 @@ class MethodMapping(models.Model):
     secrets = models.ManyToManyField(Secret)
 
     def __str__(self):
-        return f'{self.method}: {self.uri}'
+        return '{method}: {uri}'.format(method=self.method, uri=self.uri)
