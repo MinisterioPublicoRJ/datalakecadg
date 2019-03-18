@@ -10,6 +10,7 @@ class Secret(models.Model):
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField()
     secret_key = models.CharField(max_length=32, editable=False)
+    methods = models.ManyToManyField('methodmapping.MethodMapping')
 
     def save(self, *args, **kwargs):
         self.secret_key = create_secret()

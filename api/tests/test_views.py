@@ -23,7 +23,7 @@ class TestUpload(TestCase):
             method='cpf',
             uri='/path/to/storage/cpf'
         )
-        mmap.secrets.add(secret)
+        secret.methods.add(mmap)
 
         response = self.client.post(
             reverse('api-upload'),
