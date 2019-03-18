@@ -23,7 +23,7 @@ class TestUpload(TestCase):
             method='cpf',
             uri='/path/to/storage/cpf'
         )
-        mmap.secrets.add(secret)
+        secret.methods.add(mmap)
 
         response = self.client.post(
             reverse('api-upload'),
@@ -44,7 +44,7 @@ class TestUpload(TestCase):
         self.assertEqual(dest, '/path/to/storage/cpf/' + secret.username)
 
     @mock.patch('api.views.upload_to_hdfs')
-    def test_user_now_allowed_in_method(self, upload_to_hdfs):
+    def test_user_not_allowed_in_method(self, upload_to_hdfs):
         contents = b'filecontents'
 
         contents_md5 = md5(contents).hexdigest()

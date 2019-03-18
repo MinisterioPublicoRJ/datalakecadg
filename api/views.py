@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .clients import hdfsclient
 from .utils import md5reader, securedecorator
 
-from methodmapping.models import MethodMapping
+from secret.models import Secret
 
 logger = logging.getLogger(__name__)
 
@@ -26,12 +26,12 @@ def upload_to_hdfs(file, filename, destination):
 
 
 def get_destination(username, method):
-    dest = MethodMapping.objects.filter(
-        secrets__username=username,
-        method=method
+    dest = Secret.objects.filter(
+        username=username,
+        methods__method=method
     )
     if dest.exists():
-        return path.join(dest.first().uri, username)
+        return path.join(dest.first().methods.first().uri, username)
 
     raise PermissionDenied()
 
