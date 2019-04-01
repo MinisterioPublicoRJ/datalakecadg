@@ -154,7 +154,18 @@ LOGGING = {
 
 LOGIN_REDIRECT_URL = 'secret:list-secret'
 
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
 if 'RUNTIME' in os.environ:
     SECRET_KEY = config('SECRET_KEY')
     HDFS_URL = config('HDFS_URL')
     HDFS_USER = config('HDFS_USER')
+
+
+if 'PRODUCAO' in os.environ:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

@@ -1,6 +1,10 @@
 import uuid
 
+from django.conf import settings
+from django.core.mail import send_mail
 from django.db import models
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
 
 from secret.utils import create_secret
 
@@ -24,3 +28,16 @@ class Secret(models.Model):
         return '{username} - {email}'.format(
             username=self.username, email=self.email
             )
+
+
+@receiver(m2m_changed, sender=Secret.methods.through)
+def methodmapping_added(sender, **kwargs):
+    secret = kwargs.pop('instance', None)
+    for method in secret.methods.all():
+        method_description = method.description
+        send_mail(
+            'Adição de método',
+            method_description,
+            settings.EMAIL_HOST_USER,
+            [secret.email]
+        )
