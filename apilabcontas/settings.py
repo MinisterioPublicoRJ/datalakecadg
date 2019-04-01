@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'api',
     'secret',
     'methodmapping',
+    'core',
 ]
 
 MIDDLEWARE = [
