@@ -1,10 +1,11 @@
 import uuid
 
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.db import models
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
+from django.template.loader import get_template
 
 from secret.utils import create_secret
 
@@ -33,11 +34,17 @@ class Secret(models.Model):
 @receiver(m2m_changed, sender=Secret.methods.through)
 def methodmapping_added(sender, **kwargs):
     secret = kwargs.pop('instance', None)
+    email_template = get_template('secret/method_email.html')
     for method in secret.methods.all():
-        method_description = method.description
-        send_mail(
+        context = {
+            'username': secret.username,
+            'description': method.description
+        }
+        html_rendered = email_template.render(context)
+        msg = EmailMultiAlternatives(
             'Adição de método',
-            method_description,
+            html_rendered,
             settings.EMAIL_HOST_USER,
             [secret.email]
         )
+        msg.send()
