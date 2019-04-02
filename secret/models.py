@@ -37,6 +37,8 @@ def methodmapping_added(sender, **kwargs):
     for method in secret.methods.all():
         msg = msg_template.format(
             username=secret.username,
-            description=method.description
+            description=method.description,
+            method=method.method,
+            secret=secret.secret_key
         )
         send_mail(mail_server, msg, dest)
