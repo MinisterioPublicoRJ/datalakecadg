@@ -1,4 +1,5 @@
-from django.core import mail
+from unittest import mock
+
 from django.test import TestCase
 
 from model_mommy.mommy import make
@@ -7,7 +8,8 @@ from secret.models import Secret
 
 
 class SendEmail(TestCase):
-    def test_send_email_when_associate_method_with_user(self):
+    @mock.patch('secret.models.send_mail')
+    def test_send_email_when_associate_method_with_user(self, _send_mail):
         method = make('methodmapping.MethodMapping')
         secret = Secret(
             username='username',
@@ -17,4 +19,4 @@ class SendEmail(TestCase):
         secret.methods.add(method)
         secret.save()
 
-        self.assertEqual(len(mail.outbox), 1)
+        _send_mail.assert_called()
