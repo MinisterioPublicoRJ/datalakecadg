@@ -10,9 +10,11 @@ from model_mommy.mommy import make
 
 
 class TestUpload(TestCase):
+    @mock.patch('api.views.is_valid_header')
     @mock.patch('secret.models.send_mail')
     @mock.patch('api.views.upload_to_hdfs')
-    def test_file_post(self, upload_to_hdfs, _send_mail):
+    def test_file_post(self, upload_to_hdfs, _send_mail, _is_valid_header):
+        _is_valid_header.return_value = (True, {})
         contents = b'filecontents'
 
         contents_md5 = md5(contents).hexdigest()
@@ -46,8 +48,11 @@ class TestUpload(TestCase):
         self.assertEqual(filename, 'filename.csv.gz')
         self.assertEqual(dest, '/path/to/storage/cpf/' + secret.username)
 
+    @mock.patch('api.views.is_valid_header')
     @mock.patch('api.views.upload_to_hdfs')
-    def test_user_not_allowed_in_method(self, upload_to_hdfs):
+    def test_user_not_allowed_in_method(
+            self, upload_to_hdfs, _is_valid_header):
+        _is_valid_header.return_value = (True, {})
         contents = b'filecontents'
 
         contents_md5 = md5(contents).hexdigest()
@@ -135,9 +140,16 @@ class TestUpload(TestCase):
                 'File must be a GZIP csv'
             )
 
+    @mock.patch('api.views.is_valid_header')
     @mock.patch('secret.models.send_mail')
     @mock.patch('api.views.upload_to_hdfs')
-    def test_validate_sent_data_gzip(self, upload_to_hdfs, mm_added):
+    def test_validate_sent_data_gzip(
+            self,
+            upload_to_hdfs,
+            mm_added,
+            _is_valid_header
+            ):
+        _is_valid_header.return_value = (True, {})
         with gzip.open('api/tests/csv_example.csv.gz', 'rt', newline='') as file_:
             contents_md5 = md5(file_.read().encode()).hexdigest()
             file_.seek(0)
@@ -146,7 +158,8 @@ class TestUpload(TestCase):
             mmap = make(
                 'methodmapping.MethodMapping',
                 method='cpf',
-                uri='/path/to/storage/cpf'
+                uri='/path/to/storage/cpf',
+                mandatory_headers='field1,field2,field3'
             )
             secret.methods.add(mmap)
             response = self.client.post(

@@ -1,3 +1,5 @@
+import csv
+import gzip
 import logging
 
 from os import path
@@ -36,6 +38,26 @@ def get_destination(username, method):
     raise PermissionDenied()
 
 
+def is_valid_header(username, method, file_):
+    dest = Secret.objects.filter(
+        username=username,
+        methods__method=method
+    )
+    if dest.exists():
+        expected_headers = dest.first().methods.first().mandatory_headers
+        with gzip.open(file_.file, 'rt', newline='') as fobj:
+            reader = csv.reader(fobj)
+            header = next(reader)
+            file_.file.seek(0)
+            if header == expected_headers.split(','):
+                return True, {}
+            else:
+                return (False,
+                        'File must contain the following headers: {0}'.format(
+                            expected_headers
+                        ))
+
+
 @securedecorator
 @csrf_exempt
 def upload(request):
@@ -55,6 +77,12 @@ def upload(request):
     if not file.name.endswith('.gz') and not filename.endswith('.gz'):
         logger.error('%s file is not a gzip' % filename)
         BASE_RETURN['error'] = 'File must be a GZIP csv'
+        return JsonResponse(BASE_RETURN, status=400)
+
+    # Validate file header
+    valid_header, status = is_valid_header(username, method, file)
+    if not valid_header:
+        BASE_RETURN['error'] = status
         return JsonResponse(BASE_RETURN, status=400)
 
     destination = get_destination(username, method)
