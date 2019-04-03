@@ -8,6 +8,7 @@ body {
 #index * {
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 #index {
     position: absolute;
@@ -15,8 +16,8 @@ body {
     transform: translateX(-50%);
     left: 50%;
     background: #E5E5E5;
-    width: 100%;
-    height: 100%;
+    width: 1920px;
+    height: 1080px;
     background-color: rgba(255,255,255,1);
     overflow: hidden;
     margin: 0;
@@ -33,10 +34,14 @@ body {
 .bg {
     position: absolute;
     overflow: visible;
-    width: 1920px;
-    height: 1080px;
+    width: 100%;
+    height: 100%;
     left: 0px;
     top: 0px;
+    -webkit-background-size: cover;  
+    -o-background-size: cover;  
+    -moz-background-size: cover;  
+    background-size: cover;
 }
 #box {
     opacity: 1;
@@ -74,7 +79,7 @@ body {
     width: 282px;
     height: 72px;
     left: 1118px;
-    top: 742px;
+    top: 700px;
     overflow: visible;
 }
 #btn {
