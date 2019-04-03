@@ -52,7 +52,7 @@ def upload(request):
         return JsonResponse(BASE_RETURN, status=500)
 
     # Validate data file
-    if not file.name.endswith('.gz') and filename.endswith('.gz'):
+    if not file.name.endswith('.gz') and not filename.endswith('.gz'):
         logger.error('%s file is not a gzip' % filename)
         BASE_RETURN['error'] = 'File must be a GZIP csv'
         return JsonResponse(BASE_RETURN, status=400)

@@ -10,8 +10,9 @@ from model_mommy.mommy import make
 
 
 class TestUpload(TestCase):
+    @mock.patch('secret.models.send_mail')
     @mock.patch('api.views.upload_to_hdfs')
-    def test_file_post(self, upload_to_hdfs):
+    def test_file_post(self, upload_to_hdfs, _send_mail):
         contents = b'filecontents'
 
         contents_md5 = md5(contents).hexdigest()
@@ -35,14 +36,14 @@ class TestUpload(TestCase):
                 'md5': contents_md5,
                 'method': 'cpf',
                 'file': contents_file,
-                'filename': 'filename'
+                'filename': 'filename.csv.gz'
             }
         )
 
         self.assertEquals(response.status_code, 201)
         self.assertEquals(response.json()['md5'], contents_md5)
         filename, dest = upload_to_hdfs.call_args[0][1:]
-        self.assertEqual(filename, 'filename')
+        self.assertEqual(filename, 'filename.csv.gz')
         self.assertEqual(dest, '/path/to/storage/cpf/' + secret.username)
 
     @mock.patch('api.views.upload_to_hdfs')
@@ -69,7 +70,7 @@ class TestUpload(TestCase):
                 'md5': contents_md5,
                 'method': 'cpf',
                 'file': contents_file,
-                'filename': 'filename'
+                'filename': 'filename.csv.gz'
             }
         )
 
@@ -93,7 +94,8 @@ class TestUpload(TestCase):
                 'nome': secret.username,
                 'md5': 'wrongmd5',
                 'method': 'cpf',
-                'file': contents_file
+                'file': contents_file,
+                'filename': 'test.csv.gz'
             }
         )
 
@@ -122,7 +124,8 @@ class TestUpload(TestCase):
                     'nome': secret.username,
                     'md5': contents_md5,
                     'method': 'cpf',
-                    'file': file_
+                    'file': file_,
+                    'filename': 'csv_example.csv'
                 }
             )
 
