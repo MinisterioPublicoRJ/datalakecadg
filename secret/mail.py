@@ -48,10 +48,10 @@ Seguem abaixo informações sobre os dados esperados e instruções para a reali
 <strong>Data:</strong>
 <ul>
   <li>'filename': (string) nome completo do arquivo, ex.: placas_20190110.csv.gz</li>
-  <li>'nome': (string) nome do usuário: '{username}'</li>
+  <li>'nome': (string) nome do usuário - '{username}'</li>
   <li>'md5': (string) hash MD5 hexadecimal de 32 posições do arquivo enviado, em minúsculas</li>
-  <li>'method':(string) nome do método '{method}'</li>
-  <li>'SECRET':(string) Chave hexadecimal '{secret}'</li>
+  <li>'method':(string) nome do método - '{method}'</li>
+  <li>'SECRET':(string) Chave hexadecimal - '{secret}'</li>
 </ul>
 
 """
