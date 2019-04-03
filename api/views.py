@@ -1,9 +1,6 @@
 import logging
-import mimetypes
 
 from os import path
-
-import magic
 
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
@@ -39,12 +36,6 @@ def get_destination(username, method):
     raise PermissionDenied()
 
 
-def is_gzip(file_):
-    mime = magic.from_buffer(file_.file.read())
-    file_.file.seek(0)
-    return True if mime == 'application/gzip' else False
-
-
 @securedecorator
 @csrf_exempt
 def upload(request):
@@ -61,7 +52,7 @@ def upload(request):
         return JsonResponse(BASE_RETURN, status=500)
 
     # Validate data file
-    if not is_gzip(file):
+    if not file.name.endswith('.gz') and filename.endswith('.gz'):
         logger.error('%s file is not a gzip' % filename)
         BASE_RETURN['error'] = 'File must be a GZIP csv'
         return JsonResponse(BASE_RETURN, status=400)

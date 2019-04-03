@@ -1,3 +1,5 @@
+import gzip
+
 from hashlib import md5
 from io import BytesIO
 from unittest import mock
@@ -129,3 +131,32 @@ class TestUpload(TestCase):
                 response.json()['error'],
                 'File must be a GZIP csv'
             )
+
+    @mock.patch('secret.models.send_mail')
+    @mock.patch('api.views.upload_to_hdfs')
+    def test_validate_sent_data_gzip(self, upload_to_hdfs, mm_added):
+        with gzip.open('api/tests/csv_example.csv.gz', 'rt', newline='') as file_:
+            contents_md5 = md5(file_.read().encode()).hexdigest()
+            file_.seek(0)
+
+            secret = make('secret.Secret', username='anyname')
+            mmap = make(
+                'methodmapping.MethodMapping',
+                method='cpf',
+                uri='/path/to/storage/cpf'
+            )
+            secret.methods.add(mmap)
+            response = self.client.post(
+                reverse('api-upload'),
+                {
+                    'SECRET': secret.secret_key,
+                    'nome': secret.username,
+                    'md5': contents_md5,
+                    'method': 'cpf',
+                    'file': file_,
+                    'filename': 'csv_example.csv.gz'
+                }
+            )
+
+            self.assertEqual(response.status_code, 201)
+            upload_to_hdfs.assert_called()
