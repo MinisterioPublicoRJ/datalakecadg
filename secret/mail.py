@@ -28,67 +28,19 @@ def send_mail(server, msg, dest):
 
 
 msg_template = Template("""
-<p>Olá {{ username }}, você recebeu este e-mail pois foi autorizada a enviar dados<br/>
-para o método {method} na API do Data Lake MP em Mapas.
+<p>Olá {{ username }}, você recebeu este e-mail pois foi autorizado a enviar dados<br/>
+para o método {{ method }} na API do Data Lake MP em Mapas.
 Seguem abaixo informações sobre os dados esperados e instruções para a realização do envio.</p>
 <br/>
-<strong>Descrição dos Dados:</strong>
+<strong>Descrição dos Dados</strong>
+<br/>
 
 {{ description }}
 <br/><br/>
 
-<strong>Protocolo/Método:</strong>
-  HTTP - POST
-
-<br/>
-
-<strong>Enctype:</strong>
-  multipart/form-data
-<br/>
-<strong>Data:</strong>
-<ul>
-  <li>'filename': (string) nome completo do arquivo, ex.: placas_20190110.csv.gz</li>
-  <li>'nome': (string) nome do usuário - '{{ username }}'</li>
-  <li>'md5': (string) hash MD5 hexadecimal de 32 posições do arquivo enviado, em minúsculas</li>
-  <li>'method':(string) nome do método - '{{ method }}'</li>
-  <li>'SECRET':(string) Chave hexadecimal - '{{ secret }}'</li>
-</ul>
-
-<br/>
-<strong>Files:</strong>
- <ul>
-     <li>'file' (Bytes): Arquvio a ser enviado para a CADG</li>
-     <li>'filename' (string): nome do arquivo idêntico ao informado no Data</li>
- </ul>
-
- <br/>
-
-<strong>Formato do arquivo CSV (gzipped) esperado:</strong>
- <ul>
-    <li>Charset: UTF-8</li>
-    <li>Separator: ;</li>
-    <li>Quote: ""</li>
-    <li>Line terminator: \n</li>
- </ul>
-
-<br/>
-
-<strong>Compactação do Arquivo CSV:</strong>
-<ul>
-    <li>gzip</li>
-</ul>
-
-<br/>
-
-<strong>Formato do nome do Arquivo:</strong>
-<ul>
-<li>Nome (formato:[a-z0-9]+).csv.gz ex.: placas_20190110.csv.gz</li>
-</ul>
-
-<br/>
-
-<strong>Campos esperados:</strong>
-<ul>
+<strong>Campos esperados</strong>
+<br/>Cada método tem campos diferentes pré determinados que devem aparecer na primeira linha do arquivo CSV.
+<br/>Campos esperados para o método {{ method }}:<br/><br/>
 {% for header in headers %}
     <li>{{ header }}</li>
 {% endfor %}
@@ -96,12 +48,54 @@ Seguem abaixo informações sobre os dados esperados e instruções para a reali
 
 <br/>
 
-<strong>Resposta:</strong>
+<strong>Nome do Arquivo</strong>
+<ul>
+<li>Formato aceito:[a-z0-9]+).csv.gz ex.: placas_20190110231245.csv.gz</li>
+<li>Adicione no nome do arquivo a data e hora do envio para evitar colisão</li>
+<li>Caso sejam enviados dois arquivos com mesmo nome pelo mesmo usuário o primeiro será sobrescrito</li>
+</ul>
+
+<br/>
+
+<strong>Formato do arquivo esperado</strong><br/>
+ É esperado em cada envio um arquivo GZIP contendo um CSV<br/><br/>
+ Especificações do CSV:<br/>
+ <ul>
+    <li>Charset: UTF-8</li>
+    <li>Separator: ;</li>
+    <li>Quote: ""</li>
+    <li>Line terminator: \\n</li>
+ </ul>
+
+<br/>
+
+<strong>Protocolo/Método</strong>
+  HTTP - POST
+
+<br/>
+
+<strong>Enctype</strong>
+  multipart/form-data
+<br/>
+<strong>Data</strong>
+<ul>
+  <li>'filename': (string) nome completo do arquivo, ex.: placas_20190110.csv.gz</li>
+  <li>'nome': (string) nome do usuário - '{{ username }}'</li>
+  <li>'md5': (string) hash MD5 hexadecimal de 32 posições do arquivo enviado, em minúsculas</li>
+  <li>'method':(string) nome do método - '{{ method }}'</li>
+  <li>'SECRET':(string) Chave hexadecimal - '{{ secret }}'</li>
+  <li>'file' (Bytes): Arquvio a ser enviado para a CADG</li>
+</ul>
+
+<br/>
+
+
+<strong>Resposta</strong>
 <ul>
     <li>OK: status_code: 201 - Arquivo salvo com sucesso</li>
+    <li>Não OK: status code: 400 - Extensão do arquivo enviado inválida ou cabeçalhos do arquivo csv inválidos</li>
     <li>Não OK: status code: 403 - SECRET, username e/ou method estão errados</li>
     <li>Não OK: status code: 415 - md5 enviado não é o mesmo que o calculado em nosso serviço</li>
-    <li>Não OK: status code: 400 - Extensão do arquivo enviado inválida ou cabeçalhos do arquivo csv inválidos</li>
 </ul>
 <br/>
 
