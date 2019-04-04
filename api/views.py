@@ -23,7 +23,8 @@ BASE_RETURN = {
 def upload_to_hdfs(file, filename, destination):
     hdfsclient.write(
         path.join(destination, filename),
-        file
+        file,
+        overwrite=True
     )
 
 
@@ -71,13 +72,14 @@ def upload(request):
 
     if BASE_RETURN['md5'] != sent_md5:
         logger.error('%s presented MD5 checksum error' % filename)
-        return JsonResponse(BASE_RETURN, status=500)
+        BASE_RETURN['error'] = 'md5 did not match'
+        return JsonResponse(BASE_RETURN, status=400)
 
     # Validate data file
     if not file.name.endswith('.gz') and not filename.endswith('.gz'):
         logger.error('%s file is not a gzip' % filename)
         BASE_RETURN['error'] = 'File must be a GZIP csv'
-        return JsonResponse(BASE_RETURN, status=400)
+        return JsonResponse(BASE_RETURN, status=415)
 
     # Validate file header
     valid_header, status = is_valid_header(username, method, file)
