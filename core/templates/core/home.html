@@ -1,132 +1,130 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-<title>MPRJ | API Dados</title>
-<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-<div id="index">
-	<svg class="bg">
-		<pattern elementId="bg_A0_Rectangle_2" id="bg_A0_Rectangle_2_pattern" x="0" y="0" width="100%" height="100%">
-			<image x="0" y="0" width="100%" height="100%" href="{% static 'img/bg.png' %}" xlink:href="bg.png"></image>
-		</pattern>
-		<rect id="bg" rx="0" ry="0" x="0" y="0" width="1920" height="1080">
-		</rect>
-	</svg>
-	<svg class="box">
-		<rect id="box" rx="11" ry="11" x="0" y="0" width="1284" height="713">
-		</rect>
-	</svg>
-	<div id="texto_descricao">
-		<span>Visando o intercâmbio de dados que propiciará o trabalho de inteligência integrado entre o Ministério Público e o governo do Estado do Rio de Janeiro, o Parquet fluminense está disponibilizando para as secretarias de estado e seus parceiros uma ferramenta para recebimento automatizado de dados.
- <br/>
-			<br/>A ferramenta recebe atualização de dados em tempo real através do envio de um POST HTTP para endereços web pré-definidos, um para cada modelo de informações.<br/>
-			<br/>Para ter acesso ao envio de dados é necessário preencher o formulário abaixo solicitando a criação de uma conta. Após o preenchimento do formulário, nossa equipe criará uma chave secreta de autenticação para cada usuário, e as respectivas chaves serão enviadas para o e-mail cadastrado, acompanhadas de instruções técnicas que detalham como deve ser realizado o envio de arquivos para a atualização de dados em tempo real.<br/></span>
+	<head>
+		<meta charset="utf-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<title>MPRJ | API Dados</title>
+		<link rel="stylesheet" href="{% static 'css/bulma.min.css' %}">
+		<link rel="stylesheet" href="{% static 'css/style.css' %}">
+	</head>
+	<body>
+	<div class="container">
+		<header class="header has-text-centered">
+			<img src="{% static 'img/logo_dados.png' %}" />
+			<svg class="Linha_1">
+				<path id="Linha_1" d="M 0 0 L 0 64">
+				</path>
+			</svg>
+			<img src="{% static 'img/logo_MP.png' %}" />
+		</header>
+		<section class="box columns">
+			<div class="column">
+				<img src="{% static 'img/ilustracao.png' %}" />
+			</div>
+			<div class="column">
+				<article class="text-size">
+					<div id="description">
+						<p>Visando o intercâmbio de dados que propiciará o trabalho de inteligência integrado entre o Ministério Público e o governo do Estado do Rio de Janeiro, o Parquet fluminense está disponibilizando para as secretarias de estado e seus parceiros uma ferramenta para recebimento automatizado de dados.</p>
+						<p>A ferramenta recebe atualização de dados em tempo real através do envio de um POST HTTP para endereços web pré-definidos, um para cada modelo de informações.</p>
+						<p>Para ter acesso ao envio de dados é necessário preencher o formulário abaixo solicitando a criação de uma conta. Após o preenchimento do formulário, nossa equipe criará uma chave secreta de autenticação para cada usuário, e as respectivas chaves serão enviadas para o e-mail cadastrado, acompanhadas de instruções técnicas que detalham como deve ser realizado o envio de arquivos para a atualização de dados em tempo real.</p>
+					</div>
+					<div id="about">
+						<strong>Campos esperados:</strong>
+						<ul>
+							<li>Cada método tem campos diferentes pré determinados que devem aparecer na primeira linha do arquivo CSV.</li>
+							<li>Consulte o e-mail em que foi enviado a sua chave secreta para saber quais campos esperados para o método que você irá enviar arquivos.</li>
+						</ul>
+
+						<br/>
+
+						<strong>Nome do Arquivo:</strong>
+						<ul>
+						<li>Formato aceito:[a-z0-9]+).csv.gz ex.: placas_20190110231245.csv.gz</li>
+						<li>Adicione no nome do arquivo a data e hora do envio para evitar colisão</li>
+						<li>Caso sejam enviados dois arquivos com mesmo nome pelo mesmo usuário o primeiro será sobrescrito</li>
+						</ul>
+
+						<br/>
+
+						<strong>Formato do arquivo esperado: um pacote GZIP contendo um arquivo CSV</strong>
+						<ul>
+							<li>Charset: UTF-8</li>
+							<li>Separator: ;</li>
+							<li>Quote: ""</li>
+							<li>Line terminator: teste <pre>\\n</pre></li>
+						</ul>
+
+						<br/>
+
+						<strong>Protocolo/Método:</strong>
+						HTTP - POST
+
+						<br/>
+
+						<strong>Enctype:</strong>
+						multipart/form-data
+						<br/>
+						<strong>Data:</strong>
+						<ul>
+						<li>'filename': (string) nome completo do arquivo, ex.: placas_20190110.csv.gz</li>
+						<li>'nome': (string) nome do usuário - 'SEU NOME DE USUÁRIO''</li>
+						<li>'md5': (string) hash MD5 hexadecimal de 32 posições do arquivo enviado, em minúsculas</li>
+						<li>'method':(string) nome do método - 'MÉTODO PARA QUAL QUER ENVIAR OS DADOS'</li>
+						<li>'SECRET':(string) Chave hexadecimal - 'SUA CHAVE SECRETA'</li>
+						<li>'file' (Bytes): Arquvio a ser enviado para a CADG</li>
+						</ul>
+
+						<br/>
+
+
+						<strong>Resposta:</strong>
+						<ul>
+							<li>OK: status_code: 201 - Arquivo salvo com sucesso</li>
+							<li>Não OK: status code: 400 - Extensão do arquivo enviado inválida ou cabeçalhos do arquivo csv inválidos</li>
+							<li>Não OK: status code: 403 - SECRET, username e/ou method estão errados</li>
+							<li>Não OK: status code: 415 - md5 enviado não é o mesmo que o calculado em nosso serviço</li>
+						</ul>
+						<br/>
+
+						<strong>Importante</strong>
+						<p>Os arquivos são registrados no Big Data por seus nomes.
+						Normalize o nome do arquivo de acordo com seu lote e índice, para que arquivos
+						anteriores
+						não sejam sobrescritos.
+						Arquivos novos sobrescreverão arquivos homônimos no BDA.</p>
+					</div>
+				</article>
+				<div class="buttons">
+					<a href="https://forms.office.com/Pages/ResponsePage.aspx?id=lnjkyX_gzkSGzS73hM2h29rKbBueggFBrcjYXgezl4hURFNCQUhDNlpJUDBTRzBNMlBIQkQ0TkVXOS4u" target="_blank" class="button is-info is-outlined is-uppercase">
+						acessar o formulário
+					</a>
+					<button type="button" id="toggleButton" class="button is-info is-outlined is-uppercase">
+						instruções para envio
+					</button>
+				</div>
+			</div>
+		</section>
 	</div>
-	<div id="botao">
-		<button type="button" onclick="window.location.href = 'https://forms.office.com/Pages/ResponsePage.aspx?id=lnjkyX_gzkSGzS73hM2h29rKbBueggFBrcjYXgezl4hURFNCQUhDNlpJUDBTRzBNMlBIQkQ0TkVXOS4u'" class="btn btn-outline-primary">ACESSAR O FORMULÁRIO</button>
-	</div>
-	<div id="botao2">
-		<button type="button" onclick="window.location.href = '#intrucao'" class="btn btn-outline-primary">INSTRUÇÕES PARA ENVIO</button>
-	</div>
-	<svg class="ilustracao">
-		<pattern elementId="ilustracao_A0_Rectangle_6" id="ilustracao_A0_Rectangle_6_pattern" x="0" y="0" width="100%" height="100%">
-			<image x="0" y="0" width="100%" height="100%" href="{% static 'img/ilustracao.png' %}" xlink:href="ilustracao.png"></image>
-		</pattern>
-		<rect id="ilustracao" rx="0" ry="0" x="0" y="0" width="586" height="580">
-		</rect>
-	</svg>
-	<svg class="logo_dados">
-		<pattern elementId="logo_dados_A0_Rectangle_8" id="logo_dados_A0_Rectangle_8_pattern" x="0" y="0" width="100%" height="100%">
-			<image x="0" y="0" width="100%" height="100%" href="{% static 'img/logo_dados.png' %}" xlink:href="logo_dados.png"></image>
-		</pattern>
-		<rect id="logo_dados" rx="0" ry="0" x="0" y="0" width="218" height="63">
-		</rect>
-	</svg>
-	<svg class="logo_MP">
-		<pattern elementId="logo_MP_A0_Rectangle_10" id="logo_MP_A0_Rectangle_10_pattern" x="0" y="0" width="100%" height="100%">
-			<image x="0" y="0" width="100%" height="100%" href="{% static 'img/logo_MP.png' %}" xlink:href="logo_MP.png"></image>
-		</pattern>
-		<rect id="logo_MP" rx="0" ry="0" x="0" y="0" width="169" height="37">
-		</rect>
-	</svg>
-	<svg class="Linha_1">
-		<path id="Linha_1" d="M 0 0 L 0 64">
-		</path>
-	</svg>
-    <div id="about">
-        <strong>Campos esperados:</strong>
-        <ul>
-            <li>Cada método tem campos diferentes pré determinados que devem aparecer na primeira linha do arquivo CSV.</li>
-            <li>Consulte o e-mail em que foi enviado a sua chave secreta para saber quais campos esperados para o método que você irá enviar arquivos.</li>
-        </ul>
+	</body>
+	<script>
+		let toggleButton = document.getElementById('toggleButton')
+		let aboutBox = document.getElementById('about')
+		let textBox = document.getElementById('description')
+		let isShowingAbout = false
 
-        <br/>
-
-        <strong>Nome do Arquivo:</strong>
-        <ul>
-        <li>Formato aceito:[a-z0-9]+).csv.gz ex.: placas_20190110231245.csv.gz</li>
-        <li>Adicione no nome do arquivo a data e hora do envio para evitar colisão</li>
-        <li>Caso sejam enviados dois arquivos com mesmo nome pelo mesmo usuário o primeiro será sobrescrito</li>
-        </ul>
-
-        <br/>
-
-        <strong>Formato do arquivo esperado: um pacote GZIP contendo um arquivo CSV</strong>
-         <ul>
-            <li>Charset: UTF-8</li>
-            <li>Separator: ;</li>
-            <li>Quote: ""</li>
-            <li>Line terminator: teste <pre>\\n</pre></li>
-         </ul>
-
-        <br/>
-
-        <strong>Protocolo/Método:</strong>
-          HTTP - POST
-
-        <br/>
-
-        <strong>Enctype:</strong>
-          multipart/form-data
-        <br/>
-        <strong>Data:</strong>
-        <ul>
-          <li>'filename': (string) nome completo do arquivo, ex.: placas_20190110.csv.gz</li>
-          <li>'nome': (string) nome do usuário - 'SEU NOME DE USUÁRIO''</li>
-          <li>'md5': (string) hash MD5 hexadecimal de 32 posições do arquivo enviado, em minúsculas</li>
-          <li>'method':(string) nome do método - 'MÉTODO PARA QUAL QUER ENVIAR OS DADOS'</li>
-          <li>'SECRET':(string) Chave hexadecimal - 'SUA CHAVE SECRETA'</li>
-          <li>'file' (Bytes): Arquvio a ser enviado para a CADG</li>
-        </ul>
-
-        <br/>
-
-
-        <strong>Resposta:</strong>
-        <ul>
-            <li>OK: status_code: 201 - Arquivo salvo com sucesso</li>
-            <li>Não OK: status code: 400 - Extensão do arquivo enviado inválida ou cabeçalhos do arquivo csv inválidos</li>
-            <li>Não OK: status code: 403 - SECRET, username e/ou method estão errados</li>
-            <li>Não OK: status code: 415 - md5 enviado não é o mesmo que o calculado em nosso serviço</li>
-        </ul>
-        <br/>
-
-        <strong>Importante</strong>
-        <p>Os arquivos são registrados no Big Data por seus nomes.
-        Normalize o nome do arquivo de acordo com seu lote e índice, para que arquivos
-        anteriores
-        não sejam sobrescritos.
-        Arquivos novos sobrescreverão arquivos homônimos no BDA.</p>
-
-    </div>
-</div>
-
-</body>
+		toggleButton.addEventListener("click", () => {
+			if (!isShowingAbout) {
+				aboutBox.style.display = "block"
+				textBox.style.display = "none"
+				isShowingAbout = true
+				toggleButton.innerHTML = `descrição`
+			} else {
+				aboutBox.style.display = "none"
+				textBox.style.display = "block"
+				isShowingAbout = false
+				toggleButton.innerHTML = `instruções para envio`
+			}
+		})
+	</script>
 </html>
-
-
