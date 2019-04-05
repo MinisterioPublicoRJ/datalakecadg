@@ -84,6 +84,7 @@ def upload(request):
     # Validate file header
     valid_header, status = is_valid_header(username, method, file)
     if not valid_header:
+        logger.error('%s presented a non-valid header' % filename)
         BASE_RETURN['error'] = status
         return JsonResponse(BASE_RETURN, status=400)
 

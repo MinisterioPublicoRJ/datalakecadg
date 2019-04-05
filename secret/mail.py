@@ -84,7 +84,7 @@ Seguem abaixo informações sobre os dados esperados e instruções para a reali
   <li>'md5': (string) hash MD5 hexadecimal de 32 posições do arquivo enviado, em minúsculas</li>
   <li>'method':(string) nome do método - '{{ method }}'</li>
   <li>'SECRET':(string) Chave hexadecimal - '{{ secret }}'</li>
-  <li>'file' (Bytes): Arquvio a ser enviado para a CADG</li>
+  <li>'file' (Bytes): Arquvio a ser enviado para a MPRJ</li>
 </ul>
 
 <br/>
