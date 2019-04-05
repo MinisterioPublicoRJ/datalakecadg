@@ -104,8 +104,9 @@ class TestUpload(TestCase):
             }
         )
 
-        self.assertEquals(response.status_code, 500)
-        self.assertEquals(response.json()['md5'], contents_md5)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['md5'], contents_md5)
+        self.assertEqual(response.json()['error'], 'md5 did not match')
         upload_to_hdfs.assert_not_called()
 
     @mock.patch('secret.models.send_mail')
@@ -134,7 +135,7 @@ class TestUpload(TestCase):
                 }
             )
 
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 415)
             self.assertEqual(
                 response.json()['error'],
                 'File must be a GZIP csv'

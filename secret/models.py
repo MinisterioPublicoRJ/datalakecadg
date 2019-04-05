@@ -32,13 +32,20 @@ class Secret(models.Model):
 @receiver(m2m_changed, sender=Secret.methods.through)
 def methodmapping_added(sender, **kwargs):
     secret = kwargs.pop('instance', None)
+    action = kwargs.pop('action')
+    pk_set = kwargs.pop('pk_set')
+    method_manager = kwargs['model']
+
     dest = [secret.email]
     mail_server = login()
-    for method in secret.methods.all():
-        msg = msg_template.format(
-            username=secret.username,
-            description=method.description,
-            method=method.method,
-            secret=secret.secret_key
-        )
-        send_mail(mail_server, msg, dest)
+    if action == "post_add":
+        for pk in pk_set:
+            method = method_manager.objects.get(pk=pk)
+            msg = msg_template.render(
+                username=secret.username,
+                description=method.description,
+                method=method.method,
+                secret=secret.secret_key,
+                headers=method.mandatory_headers.split(',')
+            )
+            send_mail(mail_server, msg, dest)
