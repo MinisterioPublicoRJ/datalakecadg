@@ -30,6 +30,15 @@
 						<p>Para ter acesso ao envio de dados é necessário preencher o formulário abaixo solicitando a criação de uma conta. Após o preenchimento do formulário, nossa equipe criará uma chave secreta de autenticação para cada usuário, e as respectivas chaves serão enviadas para o e-mail cadastrado, acompanhadas de instruções técnicas que detalham como deve ser realizado o envio de arquivos para a atualização de dados em tempo real.</p>
 					</div>
 					<div id="about">
+						<strong>Protocolo/Método:</strong>
+						HTTP - POST
+
+						<br/>
+
+						<strong>Enctype:</strong>
+						multipart/form-data
+                        <br/><br/>
+
 						<strong>Campos esperados:</strong>
 						<ul>
 							<li>Cada método tem campos diferentes pré determinados que devem aparecer na primeira linha do arquivo CSV.</li>
@@ -57,15 +66,7 @@
 
 						<br/>
 
-						<strong>Protocolo/Método:</strong>
-						HTTP - POST
-
-						<br/>
-
-						<strong>Enctype:</strong>
-						multipart/form-data
-						<br/>
-						<strong>Data:</strong>
+						<strong>Campos do Header do POST:</strong>
 						<ul>
 						<li>'filename': (string) nome completo do arquivo, ex.: placas_20190110.csv.gz</li>
 						<li>'nome': (string) nome do usuário - 'SEU NOME DE USUÁRIO''</li>
@@ -78,7 +79,7 @@
 						<br/>
 
 
-						<strong>Resposta:</strong>
+						<strong>Respostas:</strong>
 						<ul>
 							<li>OK: status_code: 201 - Arquivo salvo com sucesso</li>
 							<li>Não OK: status code: 400 - Extensão do arquivo enviado inválida ou cabeçalhos do arquivo csv inválidos</li>
