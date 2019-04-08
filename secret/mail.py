@@ -38,6 +38,15 @@ Seguem abaixo informações sobre os dados esperados e instruções para a reali
 {{ description }}
 <br/><br/>
 
+<strong>Protocolo/Método</strong>
+  HTTP - POST
+
+<br/>
+
+<strong>Enctype</strong>
+  multipart/form-data
+<br/><br/>
+
 <strong>Campos esperados</strong>
 <br/>Cada método tem campos diferentes pré determinados que devem aparecer na primeira linha do arquivo CSV.
 <br/>Campos esperados para o método {{ method }}:<br/><br/>
@@ -69,15 +78,7 @@ Seguem abaixo informações sobre os dados esperados e instruções para a reali
 
 <br/>
 
-<strong>Protocolo/Método</strong>
-  HTTP - POST
-
-<br/>
-
-<strong>Enctype</strong>
-  multipart/form-data
-<br/>
-<strong>Data</strong>
+<strong>Campos do Header do POST:</strong>
 <ul>
   <li>'filename': (string) nome completo do arquivo, ex.: placas_20190110.csv.gz</li>
   <li>'nome': (string) nome do usuário - '{{ username }}'</li>
@@ -90,7 +91,7 @@ Seguem abaixo informações sobre os dados esperados e instruções para a reali
 <br/>
 
 
-<strong>Resposta</strong>
+<strong>Respostas</strong>
 <ul>
     <li>OK: status_code: 201 - Arquivo salvo com sucesso</li>
     <li>Não OK: status code: 400 - Extensão do arquivo enviado inválida ou cabeçalhos do arquivo csv inválidos</li>

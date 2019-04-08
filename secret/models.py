@@ -10,6 +10,7 @@ from secret.mail import login, send_mail, msg_template
 
 class Secret(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    fullname = models.CharField(max_length=255)
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField()
     secret_key = models.CharField(max_length=32, editable=False)
