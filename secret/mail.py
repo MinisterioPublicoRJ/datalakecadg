@@ -107,4 +107,13 @@ anteriores
 não sejam sobrescritos.
 Arquivos novos sobrescreverão arquivos homônimos no BDA.</p>
 
+<br/>
+
+<strong>Exemplo de envio</strong>
+<p>Estão disponibilizados no GitHub dois exemplos de scripts que enviam dados
+seguindo os requisitos descritos acima. Você pode encontrá-los no endereço
+<a target=_blank href="https://github.com/MinisterioPublicoRJ/scripts-datalakecadg">
+https://github.com/MinisterioPublicoRJ/scripts-datalakecadg
+</a>.
+</p>
 """)
