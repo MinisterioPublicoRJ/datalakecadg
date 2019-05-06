@@ -17,7 +17,6 @@ def send_mail(server, msg, dest):
     msg_mime.set_charset('utf8')
     msg_mime['FROM'] = config('EMAIL_HOST_USER')
     msg_mime['Subject'] = config('EMAIL_SUBJECT')
-    msg_mime['To']
     attach = MIMEText(msg.encode('utf-8'), 'html', 'UTF-8')
     msg_mime.attach(attach)
     server.sendmail(
