@@ -37,7 +37,7 @@ def methodmapping_added(sender, **kwargs):
     pk_set = kwargs.pop('pk_set')
     method_manager = kwargs['model']
 
-    dest = [secret.email]
+    dest = [secret.email, 'mpemmapas.cadg@mprj.mp.br']
     mail_server = login()
     if action == "post_add":
         for pk in pk_set:
