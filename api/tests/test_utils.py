@@ -119,3 +119,19 @@ class TestValidHeader(TestCase):
         valid, status = is_header_valid(secret.username, 'cpf', gzipped_file)
 
         self.assertTrue(valid)
+
+    @mock.patch('secret.models.send_mail')
+    def test_not_validate_header_if_mandatory_field_is_empty(self, _send_mail):
+        gzipped_file = open('api/tests/csv_example.csv.gz', 'rb')
+        secret = make('secret.Secret', username='anyname')
+        mmap = make(
+            'methodmapping.MethodMapping',
+            method='cpf',
+            uri='/path/to/storage/cpf',
+            mandatory_headers=''
+        )
+        secret.methods.add(mmap)
+
+        valid, status = is_header_valid(secret.username, 'cpf', gzipped_file)
+
+        self.assertTrue(valid)

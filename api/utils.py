@@ -42,6 +42,10 @@ def is_header_valid(username, method, file_):
     )
     if dest.exists():
         expected_headers = dest.first().methods.first().mandatory_headers
+        # If expected_headers is empty do not need to make validation
+        if expected_headers == '':
+            return True, {}
+
         with gzip.open(file_, 'rt', newline='') as fobj:
             reader = csv.reader(fobj)
             header = next(reader)
