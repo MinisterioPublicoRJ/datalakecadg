@@ -1,5 +1,3 @@
-import gzip
-
 from hashlib import md5
 from unittest import mock
 
@@ -119,6 +117,5 @@ class TestValidHeader(TestCase):
         secret.methods.add(mmap)
 
         valid, status = is_header_valid(secret.username, 'cpf', gzipped_file)
-        import ipdb;ipdb.set_trace()
 
         self.assertTrue(valid)
