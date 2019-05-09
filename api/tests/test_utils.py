@@ -151,7 +151,7 @@ class TestMethodDestination(TestCase):
         mmap = make(
             'methodmapping.MethodMapping',
             method=methodname,
-            uri='/path/to/storage/cpf',
+            uri='/path/to/storage/' + methodname,
             mandatory_headers='field1,field2,field3'
         )
         secret.methods.add(mmap)
