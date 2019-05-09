@@ -68,7 +68,7 @@ def get_destination(username, method):
     )
     if user_secret.exists():
         return path.join(
-            user_secret.first().methods.get(method=method).uri,
+            user_secret.get().methods.get(method=method).uri,
             username
         )
 
