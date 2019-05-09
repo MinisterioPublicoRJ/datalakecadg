@@ -139,3 +139,26 @@ class TestValidHeader(TestCase):
         valid, status = is_header_valid(secret.username, 'cpf', gzipped_file)
 
         self.assertTrue(valid)
+
+
+class TestMethodDestination(TestCase):
+    @mock.patch('secret.models.send_mail')
+    def test_get_correct_destination(self, _send_mail):
+        username = 'anyname'
+        methodname = 'cpf'
+
+        secret = make('secret.Secret', username=username)
+        mmap = make(
+            'methodmapping.MethodMapping',
+            method=methodname,
+            uri='/path/to/storage/cpf',
+            mandatory_headers='field1,field2,field3'
+        )
+        secret.methods.add(mmap)
+
+        dest = get_destination(username, methodname)
+
+        self.assertEqual(
+            dest,
+            '/path/to/storage/{0}/{1}'.format(methodname, username)
+        )
