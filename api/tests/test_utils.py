@@ -6,7 +6,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 from model_mommy.mommy import make
 
-from api.utils import securedecorator, md5reader, is_header_valid
+from api.utils import (
+    securedecorator,
+    md5reader,
+    is_header_valid,
+    get_destination)
 
 
 @securedecorator
