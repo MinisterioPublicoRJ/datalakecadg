@@ -8,7 +8,7 @@ class MethodMapping(models.Model):
         help_text="Exemplo: /user/mpmapas/staging/labcontas/cpf"
     )
     description = models.TextField()
-    mandatory_headers = models.TextField()
+    mandatory_headers = models.TextField(blank=True)
 
     def __str__(self):
         return '{method}: {uri}'.format(method=self.method, uri=self.uri)

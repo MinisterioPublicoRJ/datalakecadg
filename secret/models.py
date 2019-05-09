@@ -17,7 +17,9 @@ class Secret(models.Model):
     methods = models.ManyToManyField('methodmapping.MethodMapping')
 
     def save(self, *args, **kwargs):
-        self.secret_key = create_secret()
+        self.secret_key = self.secret_key\
+            if self.secret_key else create_secret()
+
         super().save(*args, **kwargs)
 
     class Meta:
