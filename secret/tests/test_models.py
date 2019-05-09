@@ -20,3 +20,18 @@ class SendEmail(TestCase):
         secret.save()
 
         _send_mail.assert_called()
+
+
+class CreateSecret(TestCase):
+    def test_dont_change_secret(self):
+        "Test that user's secret is not changed everytime user object is saved"
+        secret = Secret(
+            username='username',
+            email='user@mail.com'
+        )
+        secret.save()
+
+        first_secret_key = secret.secret_key
+        secret.save()
+
+        self.assertEqual(secret.secret_key, first_secret_key)
