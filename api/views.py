@@ -2,14 +2,15 @@ import logging
 
 from os import path
 
-from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .clients import hdfsclient
-from .utils import md5reader, securedecorator, is_header_valid
-
-from secret.models import Secret
+from .utils import (
+    md5reader,
+    securedecorator,
+    is_header_valid,
+    get_destination)
 
 logger = logging.getLogger(__name__)
 
@@ -24,17 +25,6 @@ def upload_to_hdfs(file, filename, destination):
         file,
         overwrite=True
     )
-
-
-def get_destination(username, method):
-    dest = Secret.objects.filter(
-        username=username,
-        methods__method=method
-    )
-    if dest.exists():
-        return path.join(dest.first().methods.first().uri, username)
-
-    raise PermissionDenied()
 
 
 @securedecorator

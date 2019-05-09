@@ -1,6 +1,8 @@
 import csv
 import gzip
 
+from os import path
+
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_http_methods
 from functools import wraps
@@ -57,3 +59,17 @@ def is_header_valid(username, method, file_):
                         'File must contain the following headers: {0}'.format(
                             expected_headers
                         ))
+
+
+def get_destination(username, method):
+    user_secret = Secret.objects.filter(
+        username=username,
+        methods__method=method
+    )
+    if user_secret.exists():
+        return path.join(
+            user_secret.get().methods.get(method=method).uri,
+            username
+        )
+
+    raise PermissionDenied()
