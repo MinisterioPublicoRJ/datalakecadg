@@ -162,3 +162,32 @@ class TestMethodDestination(TestCase):
             dest,
             '/path/to/storage/{0}/{1}'.format(methodname, username)
         )
+
+    @mock.patch('secret.models.send_mail')
+    def test_get_correct_destination_with_more_methods(self, _send_mail):
+        username = 'anyname'
+        methodname_1 = 'cpf'
+        methodname_2 = 'cnpj'
+
+        secret = make('secret.Secret', username=username)
+        mmap_1 = make(
+            'methodmapping.MethodMapping',
+            method=methodname_1,
+            uri='/path/to/storage/' + methodname_1,
+            mandatory_headers='field1,field2,field3'
+        )
+        mmap_2 = make(
+            'methodmapping.MethodMapping',
+            method=methodname_2,
+            uri='/path/to/storage/' + methodname_2,
+            mandatory_headers='field1,field2,field3'
+        )
+        secret.methods.add(mmap_1)
+        secret.methods.add(mmap_2)
+
+        dest = get_destination(username, methodname_2)
+
+        self.assertEqual(
+            dest,
+            '/path/to/storage/{0}/{1}'.format(methodname_2, username)
+        )

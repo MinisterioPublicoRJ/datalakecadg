@@ -62,11 +62,14 @@ def is_header_valid(username, method, file_):
 
 
 def get_destination(username, method):
-    dest = Secret.objects.filter(
+    user_secret = Secret.objects.filter(
         username=username,
         methods__method=method
     )
-    if dest.exists():
-        return path.join(dest.first().methods.first().uri, username)
+    if user_secret.exists():
+        return path.join(
+            user_secret.first().methods.get(method=method).uri,
+            username
+        )
 
     raise PermissionDenied()
