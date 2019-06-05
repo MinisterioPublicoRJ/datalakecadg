@@ -70,7 +70,7 @@ Seguem abaixo informações sobre os dados esperados e instruções para a reali
  Especificações do CSV:<br/>
  <ul>
     <li>Charset: UTF-8</li>
-    <li>Separator: ;</li>
+    <li>Separator: ,</li>
     <li>Quote: ""</li>
     <li>Line terminator: \\n</li>
  </ul>
