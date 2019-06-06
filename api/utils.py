@@ -1,8 +1,10 @@
+import logging
 import csv
 import gzip
 
 from os import path
 
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_http_methods
 from functools import wraps
@@ -11,12 +13,18 @@ from hashlib import md5
 from secret.models import Secret
 
 
+logger = logging.getLogger(__name__)
+
+
 def securedecorator(func):
 
     @wraps(func)
     @require_http_methods(["POST"])
     def wrapper(*args, **kwargs):
         request = args[0]
+
+        if settings.VERBOSE:
+            logger.error(request.POST)
 
         username = request.POST.get('nome', -1)
         secret = request.POST.get('SECRET', -1)

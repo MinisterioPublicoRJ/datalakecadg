@@ -162,3 +162,4 @@ if 'RUNTIME' in os.environ:
     SECRET_KEY = config('SECRET_KEY')
     HDFS_URL = config('HDFS_URL')
     HDFS_USER = config('HDFS_USER')
+    VERBOSE = config('VERBOSE', False)
