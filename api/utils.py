@@ -48,7 +48,7 @@ def is_header_valid(username, method, file_):
         if expected_headers == '':
             return True, {}
 
-        with gzip.open(file_, 'rt', newline='') as fobj:
+        with gzip.open(file_, 'rt', newline='', encoding='utf-8-sig') as fobj:
             dialect = csv.Sniffer().sniff(fobj.read(1024))
             fobj.seek(0)
             reader = csv.reader(fobj, dialect)
