@@ -140,6 +140,22 @@ class TestValidHeader(TestCase):
 
         self.assertTrue(valid)
 
+    @mock.patch('secret.models.send_mail')
+    def test_validate_file_header_with_semicolon(self, _send_mail):
+        gzipped_file = open('api/tests/csv_example_semicolon.csv.gz', 'rb')
+        secret = make('secret.Secret', username='anyname')
+        mmap = make(
+            'methodmapping.MethodMapping',
+            method='cpf',
+            uri='/path/to/storage/cpf',
+            mandatory_headers='field1,field2,field3'
+        )
+        secret.methods.add(mmap)
+
+        valid, status = is_header_valid(secret.username, 'cpf', gzipped_file)
+
+        self.assertTrue(valid)
+
 
 class TestMethodDestination(TestCase):
     @mock.patch('secret.models.send_mail')
