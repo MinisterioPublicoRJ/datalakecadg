@@ -49,7 +49,7 @@ def is_header_valid(username, method, file_):
             return True, {}
 
         with gzip.open(file_, 'rt', newline='', encoding='utf-8-sig') as fobj:
-            dialect = csv.Sniffer().sniff(fobj.read(1024))
+            dialect = csv.Sniffer().sniff(fobj.readline())
             fobj.seek(0)
             reader = csv.reader(fobj, dialect)
             header = next(reader)
