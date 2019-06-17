@@ -58,8 +58,10 @@ def is_header_valid(username, method, file_):
                 return True, {}
             else:
                 return (False,
-                        'File must contain the following headers: {0}'.format(
-                            expected_headers
+                        'File must contain the following headers: {0}.'
+                        ' Received: {1}'.format(
+                            expected_headers,
+                            ','.join(header)
                         ))
 
 

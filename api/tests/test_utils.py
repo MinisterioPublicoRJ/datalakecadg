@@ -156,6 +156,26 @@ class TestValidHeader(TestCase):
 
         self.assertTrue(valid)
 
+    @mock.patch('secret.models.login')
+    def test_validate_header_error_log(self, _send_mail):
+        gzipped_file = open('api/tests/csv_example_semicolon.csv.gz', 'rb')
+        secret = make('secret.Secret', username='anyname')
+        mmap = make(
+            'methodmapping.MethodMapping',
+            method='cpf',
+            uri='/path/to/storage/cpf',
+            mandatory_headers='other_field1,other_field2,other_field3'
+        )
+        secret.methods.add(mmap)
+
+        expected_status = 'File must contain the following headers: '\
+            'other_field1,other_field2,other_field3. Received: field1,field2,'\
+            'field3'
+        valid, status = is_header_valid(secret.username, 'cpf', gzipped_file)
+
+        self.assertFalse(valid)
+        self.assertEqual(status, expected_status)
+
 
 class TestMethodDestination(TestCase):
     @mock.patch('secret.models.send_mail')
