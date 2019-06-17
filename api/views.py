@@ -71,7 +71,7 @@ def upload(request):
 
     logger.info(
         'username %s -> %s successfully uploaded to HDFS'
-        % (filename, username)
+        % (username, filename)
     )
 
     return JsonResponse(
