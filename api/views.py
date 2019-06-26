@@ -44,6 +44,8 @@ def upload(request):
             % (filename, username)
         )
         BASE_RETURN['error'] = 'md5 did not match'
+        BASE_RETURN['cgmd5'] = BASE_RETURN['md5'].encode().__repr__()
+        BASE_RETURN['csmd5'] = sent_md5.encode().__repr__()
         return JsonResponse(BASE_RETURN, status=400)
 
     # Validate data file
