@@ -9,7 +9,9 @@ from secret.models import Secret
 
 class SendEmail(TestCase):
     @mock.patch('secret.models.send_mail')
-    def test_send_email_when_associate_method_with_user(self, _send_mail):
+    @mock.patch('secret.models.login')
+    def test_send_email_when_associate_method_with_user(self, _login,
+                                                        _send_mail):
         method = make('methodmapping.MethodMapping')
         secret = Secret(
             username='username',
