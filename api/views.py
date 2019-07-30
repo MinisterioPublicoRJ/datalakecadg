@@ -41,7 +41,7 @@ def upload(request):
     if BASE_RETURN['md5'] != sent_md5:
         logger.error(
             'username %s -> %s presented MD5 checksum error'
-            % (filename, username)
+            % (username, filename)
         )
         BASE_RETURN['error'] = 'md5 did not match'
         return JsonResponse(BASE_RETURN, status=400)
@@ -50,7 +50,7 @@ def upload(request):
     if not file.name.endswith('.gz') and not filename.endswith('.gz'):
         logger.error(
             'username: %s -> %s file is not a gzip'
-            % (filename, username)
+            % (username, filename)
         )
         BASE_RETURN['error'] = 'File must be a GZIP csv'
         return JsonResponse(BASE_RETURN, status=415)
@@ -60,7 +60,7 @@ def upload(request):
     if not valid_header:
         logger.error(
             'username: %s -> %s presented a non-valid header'
-            % (filename, username)
+            % (username, filename)
         )
         BASE_RETURN['error'] = status
         return JsonResponse(BASE_RETURN, status=400)
@@ -71,7 +71,7 @@ def upload(request):
 
     logger.info(
         'username %s -> %s successfully uploaded to HDFS'
-        % (filename, username)
+        % (username, filename)
     )
 
     return JsonResponse(

@@ -108,8 +108,8 @@ class TestMd5Reader(TestCase):
 
 
 class TestValidHeader(TestCase):
-    @mock.patch('secret.models.send_mail')
-    def test_validate_file_header(self, _send_mail):
+    @mock.patch('secret.models.login')
+    def test_validate_file_header(self, _mail_login):
         gzipped_file = open('api/tests/csv_example.csv.gz', 'rb')
         secret = make('secret.Secret', username='anyname')
         mmap = make(
@@ -124,8 +124,9 @@ class TestValidHeader(TestCase):
 
         self.assertTrue(valid)
 
-    @mock.patch('secret.models.send_mail')
-    def test_not_validate_header_if_mandatory_field_is_empty(self, _send_mail):
+    @mock.patch('secret.models.login')
+    def test_not_validate_header_if_mandatory_field_is_empty(self,
+                                                             _mail_login):
         gzipped_file = open('api/tests/csv_example.csv.gz', 'rb')
         secret = make('secret.Secret', username='anyname')
         mmap = make(
@@ -140,10 +141,46 @@ class TestValidHeader(TestCase):
 
         self.assertTrue(valid)
 
+    @mock.patch('secret.models.login')
+    def test_validate_file_header_with_semicolon(self, _mail_login):
+        gzipped_file = open('api/tests/csv_example_semicolon.csv.gz', 'rb')
+        secret = make('secret.Secret', username='anyname')
+        mmap = make(
+            'methodmapping.MethodMapping',
+            method='cpf',
+            uri='/path/to/storage/cpf',
+            mandatory_headers='field1,field2,field3'
+        )
+        secret.methods.add(mmap)
+
+        valid, status = is_header_valid(secret.username, 'cpf', gzipped_file)
+
+        self.assertTrue(valid)
+
+    @mock.patch('secret.models.login')
+    def test_validate_header_error_log(self, _mail_login):
+        gzipped_file = open('api/tests/csv_example_semicolon.csv.gz', 'rb')
+        secret = make('secret.Secret', username='anyname')
+        mmap = make(
+            'methodmapping.MethodMapping',
+            method='cpf',
+            uri='/path/to/storage/cpf',
+            mandatory_headers='other_field1,other_field2,other_field3'
+        )
+        secret.methods.add(mmap)
+
+        expected_status = 'File must contain the following headers: '\
+            'other_field1,other_field2,other_field3. Received: field1,field2,'\
+            'field3'
+        valid, status = is_header_valid(secret.username, 'cpf', gzipped_file)
+
+        self.assertFalse(valid)
+        self.assertEqual(status, expected_status)
+
 
 class TestMethodDestination(TestCase):
-    @mock.patch('secret.models.send_mail')
-    def test_get_correct_destination(self, _send_mail):
+    @mock.patch('secret.models.login')
+    def test_get_correct_destination(self, _mail_login):
         username = 'anyname'
         methodname = 'cpf'
 
@@ -163,8 +200,8 @@ class TestMethodDestination(TestCase):
             '/path/to/storage/{0}/{1}'.format(methodname, username)
         )
 
-    @mock.patch('secret.models.send_mail')
-    def test_get_correct_destination_with_more_methods(self, _send_mail):
+    @mock.patch('secret.models.login')
+    def test_get_correct_destination_with_more_methods(self, _mail_login):
         username = 'anyname'
         methodname_1 = 'cpf'
         methodname_2 = 'cnpj'
