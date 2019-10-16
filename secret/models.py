@@ -52,4 +52,4 @@ def methodmapping_added(sender, **kwargs):
                 secret=secret.secret_key,
                 headers=method.mandatory_headers.split(',')
             )
-            send_mail(mail_server, msg, dest)
+            send_mail(mail_server, msg, dest, method_name=method.method)

@@ -12,11 +12,11 @@ def login():
     return server
 
 
-def send_mail(server, msg, dest):
+def send_mail(server, msg, dest, method_name):
     msg_mime = MIMEMultipart('alternative')
     msg_mime.set_charset('utf8')
     msg_mime['FROM'] = config('EMAIL_HOST_USER')
-    msg_mime['Subject'] = config('EMAIL_SUBJECT')
+    msg_mime['Subject'] = '%s - %s' % (method_name, config('EMAIL_SUBJECT'))
     msg_mime['To'] = dest[0]
     msg_mime['Bcc'] = dest[1]
     attach = MIMEText(msg.encode('utf-8'), 'html', 'UTF-8')
