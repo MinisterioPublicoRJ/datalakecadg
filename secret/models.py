@@ -46,6 +46,7 @@ def methodmapping_added(sender, **kwargs):
             method = method_manager.objects.get(pk=pk)
             msg = msg_template.render(
                 username=secret.username,
+                fullname=secret.fullname,
                 description=method.description,
                 method=method.method,
                 secret=secret.secret_key,
