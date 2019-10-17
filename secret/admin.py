@@ -18,7 +18,7 @@ class SecretAdminForm(forms.ModelForm):
 
 class SecretAdmin(admin.ModelAdmin):
     readonly_fields = ['secret_key']
-    list_display = ('username', 'email', 'secret_key')
+    list_display = ('fullname', 'username', 'email', 'secret_key')
     form = SecretAdminForm
 
 
