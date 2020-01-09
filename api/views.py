@@ -14,10 +14,6 @@ from .utils import (
 
 logger = logging.getLogger(__name__)
 
-BASE_RETURN = {
-    'md5': ''
-}
-
 
 def upload_to_hdfs(file, filename, destination):
     hdfsclient.write(
@@ -30,6 +26,9 @@ def upload_to_hdfs(file, filename, destination):
 @securedecorator
 @csrf_exempt
 def upload(request):
+    BASE_RETURN = {
+        'md5': ''
+    }
     file = request.FILES['file']
     username = request.POST.get('nome')
     method = request.POST.get('method')
