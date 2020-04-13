@@ -14,10 +14,6 @@ from .utils import (
 
 logger = logging.getLogger(__name__)
 
-BASE_RETURN = {
-    'md5': ''
-}
-
 
 def upload_to_hdfs(file, filename, destination):
     hdfsclient.write(
@@ -36,7 +32,9 @@ def upload(request):
     filename = request.POST.get('filename')
     sent_md5 = request.POST.get('md5')
 
-    BASE_RETURN['md5'] = md5reader(file)
+    BASE_RETURN = {
+        'md5': md5reader(file),
+    }
 
     if BASE_RETURN['md5'] != sent_md5:
         logger.error(
