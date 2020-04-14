@@ -43,7 +43,7 @@ def is_header_valid(username, method, file_):
         methods__method=method
     )
     if dest.exists():
-        expected_headers = dest.first().methods.first().mandatory_headers
+        expected_headers = dest.first().methods.get(method=method).mandatory_headers
         # If expected_headers is empty do not need to make validation
         if expected_headers == '':
             return True, {}
