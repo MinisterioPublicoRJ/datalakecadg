@@ -3,9 +3,11 @@ import gzip
 
 from os import path
 
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_http_methods
 from functools import wraps
+from goodtables import validate
 from hashlib import md5
 
 from secret.models import Secret
@@ -37,38 +39,40 @@ def md5reader(uploadedfile):
     return hash_md5.hexdigest()
 
 
-def get_file_header(file_):
+def read_csv_sample(file_, sample_size=100):
     with gzip.open(file_, 'rt', newline='', encoding='utf-8-sig') as fobj:
-        dialect = csv.Sniffer().sniff(fobj.readline())
+        # force delimiter to be ';'
+        reader = csv.reader(fobj, delimiter=";")
+        samples_count = 0
+        sample_data = []
+        for row in reader:
+            sample_data.append(row)
+            samples_count += 1
+            if samples_count == sample_size:
+                break
+
         fobj.seek(0)
-        reader = csv.reader(fobj, dialect)
-        header = next(reader)
-        file_.seek(0)
 
-    return header, file_
+    return sample_data
 
 
-def is_header_valid(username, method, file_):
+def is_data_valid(username, method, file_):
     dest = Secret.objects.filter(
         username=username,
         methods__method=method
     )
     if dest.exists():
-        expected_headers = dest.first().methods.get(method=method).mandatory_headers
-        # If expected_headers is empty do not need to make validation
-        if expected_headers == '':
-            return True, {}
+        expected_schema = dest.first().methods.get(method=method).schema
 
-        header, file_ = get_file_header(file_)
-        if header == expected_headers.split(','):
+        sample_data = read_csv_sample(
+            file_,
+            sample_size=settings.CSV_SAMPLE_SIZE,
+        )
+        validation = validate(sample_data, schema=expected_schema)
+        if validation["valid"]:
             return True, {}
         else:
-            return (False,
-                    'File must contain the following headers: {0}.'
-                    ' Received: {1}'.format(
-                        expected_headers,
-                        ','.join(header)
-                    ))
+            return False, validation["tables"][0]["errors"]
 
 
 def get_destination(username, method):

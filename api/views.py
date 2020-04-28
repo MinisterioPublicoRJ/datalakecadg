@@ -9,7 +9,7 @@ from .clients import hdfsclient
 from .utils import (
     md5reader,
     securedecorator,
-    is_header_valid,
+    is_data_valid,
     get_destination)
 
 logger = logging.getLogger(__name__)
@@ -54,10 +54,10 @@ def upload(request):
         return JsonResponse(BASE_RETURN, status=415)
 
     # Validate file header
-    valid_header, status = is_header_valid(username, method, file.file)
+    valid_header, status = is_data_valid(username, method, file.file)
     if not valid_header:
         logger.error(
-            'username: %s -> %s presented a non-valid header'
+            'username: %s -> %s presented a non-valid schema'
             % (username, filename)
         )
         BASE_RETURN['error'] = status

@@ -50,6 +50,5 @@ def methodmapping_added(sender, **kwargs):
                 description=method.description,
                 method=method.method,
                 secret=secret.secret_key,
-                headers=method.mandatory_headers.split(',')
             )
             send_mail(mail_server, msg, dest, method_name=method.method)

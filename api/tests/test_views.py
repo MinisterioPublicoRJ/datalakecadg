@@ -10,13 +10,13 @@ from model_mommy.mommy import make
 
 
 class TestUpload(TestCase):
-    @mock.patch('api.views.is_header_valid')
+    @mock.patch('api.views.is_data_valid')
     @mock.patch('secret.models.send_mail')
     @mock.patch('api.views.upload_to_hdfs')
     @mock.patch('secret.models.login')
     def test_file_post(self, _login, upload_to_hdfs, _send_mail,
-                       _is_header_valid):
-        _is_header_valid.return_value = (True, {})
+                       _is_data_valid):
+        _is_data_valid.return_value = (True, {})
         contents = b'filecontents'
 
         contents_md5 = md5(contents).hexdigest()
@@ -50,11 +50,11 @@ class TestUpload(TestCase):
         self.assertEqual(filename, 'filename.csv.gz')
         self.assertEqual(dest, '/path/to/storage/cpf/' + secret.username)
 
-    @mock.patch('api.views.is_header_valid')
+    @mock.patch('api.views.is_data_valid')
     @mock.patch('api.views.upload_to_hdfs')
     def test_user_not_allowed_in_method(
-            self, upload_to_hdfs, _is_header_valid):
-        _is_header_valid.return_value = (True, {})
+            self, upload_to_hdfs, _is_data_valid):
+        _is_data_valid.return_value = (True, {})
         contents = b'filecontents'
 
         contents_md5 = md5(contents).hexdigest()
@@ -144,7 +144,7 @@ class TestUpload(TestCase):
                 'File must be a GZIP csv'
             )
 
-    @mock.patch('api.views.is_header_valid')
+    @mock.patch('api.views.is_data_valid')
     @mock.patch('secret.models.send_mail')
     @mock.patch('api.views.upload_to_hdfs')
     @mock.patch('secret.models.login')
@@ -153,11 +153,11 @@ class TestUpload(TestCase):
             _login,
             upload_to_hdfs,
             mm_added,
-            _is_header_valid
+            _is_data_valid
             ):
-        _is_header_valid.return_value = (True, {})
+        _is_data_valid.return_value = (True, {})
         with gzip.open(
-                'api/tests/csv_example.csv.gz', 'rt', newline=''
+                'api/tests/csv_example_semicolon.csv.gz', 'rt', newline=''
         ) as file_:
             contents_md5 = md5(file_.read().encode()).hexdigest()
             file_.seek(0)
@@ -167,7 +167,13 @@ class TestUpload(TestCase):
                 'methodmapping.MethodMapping',
                 method='cpf',
                 uri='/path/to/storage/cpf',
-                mandatory_headers='field1,field2,field3'
+                schema={
+                    "fields": [
+                        {"name": "field1"},
+                        {"name": "field2"},
+                        {"name": "field3"},
+                    ]
+                },
             )
             secret.methods.add(mmap)
             response = self.client.post(
@@ -178,40 +184,45 @@ class TestUpload(TestCase):
                     'md5': contents_md5,
                     'method': 'cpf',
                     'file': file_,
-                    'filename': 'csv_example.csv.gz'
+                    'filename': 'csv_example_semicolon.csv.gz'
                 }
             )
 
             self.assertEqual(response.status_code, 201)
             upload_to_hdfs.assert_called()
 
-    @mock.patch("api.utils.get_file_header")
+    @mock.patch("api.utils.read_csv_sample")
     @mock.patch("api.views.md5reader", return_value="md5 value")
     @mock.patch('secret.models.send_mail')
     @mock.patch('api.views.upload_to_hdfs')
     @mock.patch('secret.models.login')
-    def test_validated_mandatory_headers_fail(
+    def test_validated_schema_fail(
         self,
         _email_login,
         upload_to_hdfs,
         mm_added,
         _md5reader,
-        _get_file_header,
+        _read_csv_sample,
     ):
         with gzip.open(
-                'api/tests/csv_example.csv.gz', 'rt', newline=''
+                'api/tests/csv_example_semicolon.csv.gz', 'rt', newline=''
         ) as file_:
             # Return different header
-            _get_file_header.return_value = [
-                ['field1', 'field2', 'field3'],
-                file_,
+            _read_csv_sample.return_value = [
+                ['field1', 'field2', 'field3'], ["1", "2"]
             ]
             secret = make('secret.Secret', username='anyname')
             mmap = make(
                 'methodmapping.MethodMapping',
                 method='cpf',
                 uri='/path/to/storage/cpf',
-                mandatory_headers='other_field1,other_field2,other_field3'
+                schema={
+                    "fields": [
+                        {"name": "other_field1"},
+                        {"name": "other_field2"},
+                        {"name": "other_field3"},
+                    ]
+                },
             )
             secret.methods.add(mmap)
             response = self.client.post(
@@ -227,8 +238,4 @@ class TestUpload(TestCase):
             )
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(
-            response.json()['error'],
-            "File must contain the following headers: other_field1,"\
-            "other_field2,other_field3. Received: field1,field2,field3"
-        )
+        self.assertTrue(len(response.json()['error']))

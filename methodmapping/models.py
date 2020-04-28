@@ -9,7 +9,6 @@ class MethodMapping(models.Model):
         help_text="Exemplo: /user/mpmapas/staging/datalake/cpf"
     )
     description = models.TextField()
-    mandatory_headers = models.TextField(blank=True)
     schema = JSONField(null=True)
 
     def __str__(self):
