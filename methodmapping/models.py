@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 
 
@@ -9,6 +10,7 @@ class MethodMapping(models.Model):
     )
     description = models.TextField()
     mandatory_headers = models.TextField(blank=True)
+    schema = JSONField(null=True)
 
     def __str__(self):
         return '{method}: {uri}'.format(method=self.method, uri=self.uri)
