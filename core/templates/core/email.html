@@ -26,8 +26,8 @@ Seguem abaixo informações sobre os dados esperados e instruções para a reali
 <strong>Campos esperados</strong>
 <br/>Cada método tem campos diferentes pré determinados que devem aparecer na primeira linha do arquivo CSV.
 <br/>Campos esperados para o método {{ method }}:<br/><br/>
-{% for header in headers %}
-    <li>{{ header }}</li>
+{% for field in schema.fields %}
+  <li>{{ field.name }} - tipo: {{ field.type|default("string") }}</li>
 {% endfor %}
 </ul>
 
