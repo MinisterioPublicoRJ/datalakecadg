@@ -184,3 +184,51 @@ class TestUpload(TestCase):
 
             self.assertEqual(response.status_code, 201)
             upload_to_hdfs.assert_called()
+
+    @mock.patch("api.utils.get_file_header")
+    @mock.patch("api.views.md5reader", return_value="md5 value")
+    @mock.patch('secret.models.send_mail')
+    @mock.patch('api.views.upload_to_hdfs')
+    @mock.patch('secret.models.login')
+    def test_validated_mandatory_headers_fail(
+        self,
+        _email_login,
+        upload_to_hdfs,
+        mm_added,
+        _md5reader,
+        _get_file_header,
+    ):
+        with gzip.open(
+                'api/tests/csv_example.csv.gz', 'rt', newline=''
+        ) as file_:
+            # Return different header
+            _get_file_header.return_value = [
+                ['field1', 'field2', 'field3'],
+                file_,
+            ]
+            secret = make('secret.Secret', username='anyname')
+            mmap = make(
+                'methodmapping.MethodMapping',
+                method='cpf',
+                uri='/path/to/storage/cpf',
+                mandatory_headers='other_field1,other_field2,other_field3'
+            )
+            secret.methods.add(mmap)
+            response = self.client.post(
+                reverse('api-upload'),
+                {
+                    'SECRET': secret.secret_key,
+                    'nome': secret.username,
+                    'md5': "md5 value",
+                    'method': 'cpf',
+                    'file': file_,
+                    'filename': 'csv_example.csv.gz'
+                }
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json()['error'],
+            "File must contain the following headers: other_field1,"\
+            "other_field2,other_field3. Received: field1,field2,field3"
+        )
