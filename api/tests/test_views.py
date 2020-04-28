@@ -204,38 +204,34 @@ class TestUpload(TestCase):
         _md5reader,
         _read_csv_sample,
     ):
-        with gzip.open(
-                'api/tests/csv_example_semicolon.csv.gz', 'rt', newline=''
-        ) as file_:
-            # Return different header
-            _read_csv_sample.return_value = [
-                ['field1', 'field2', 'field3'], ["1", "2", "3"]
-            ]
-            secret = make('secret.Secret', username='anyname')
-            mmap = make(
-                'methodmapping.MethodMapping',
-                method='cpf',
-                uri='/path/to/storage/cpf',
-                schema={
-                    "fields": [
-                        {"name": "other_field1"},
-                        {"name": "other_field2"},
-                        {"name": "other_field3"},
-                    ]
-                },
-            )
-            secret.methods.add(mmap)
-            response = self.client.post(
-                reverse('api-upload'),
-                {
-                    'SECRET': secret.secret_key,
-                    'nome': secret.username,
-                    'md5': "md5 value",
-                    'method': 'cpf',
-                    'file': file_,
-                    'filename': 'csv_example.csv.gz'
-                }
-            )
+        _read_csv_sample.return_value = [
+            ['field1', 'field2', 'field3'], ["1", "2", "3"]
+        ]
+        secret = make('secret.Secret', username='anyname')
+        mmap = make(
+            'methodmapping.MethodMapping',
+            method='cpf',
+            uri='/path/to/storage/cpf',
+            schema={
+                "fields": [
+                    {"name": "other_field1"},
+                    {"name": "other_field2"},
+                    {"name": "other_field3"},
+                ]
+            },
+        )
+        secret.methods.add(mmap)
+        response = self.client.post(
+            reverse('api-upload'),
+            {
+                'SECRET': secret.secret_key,
+                'nome': secret.username,
+                'md5': "md5 value",
+                'method': 'cpf',
+                'file': BytesIO(b"dummy content"),
+                'filename': 'csv_example.csv.gz'
+            }
+        )
 
         self.assertEqual(response.status_code, 400)
         self.assertTrue(len(response.json()['error']))
@@ -253,38 +249,74 @@ class TestUpload(TestCase):
         _md5reader,
         _read_csv_sample,
     ):
-        with gzip.open(
-                'api/tests/csv_example_semicolon.csv.gz', 'rt', newline=''
-        ) as file_:
-            # Return different header
-            _read_csv_sample.return_value = [
-                ['field1', 'field2', 'field3'], ["1", "2", "3"]
-            ]
-            secret = make('secret.Secret', username='anyname')
-            mmap = make(
-                'methodmapping.MethodMapping',
-                method='cpf',
-                uri='/path/to/storage/cpf',
-                schema={
-                    "fields": [
-                        {"name": "field1"},
-                        {"name": "field2"},
-                        {"name": "field3"},
-                    ]
-                },
-            )
-            secret.methods.add(mmap)
-            response = self.client.post(
-                reverse('api-upload'),
-                {
-                    'SECRET': secret.secret_key,
-                    'nome': secret.username,
-                    'md5': "md5 value",
-                    'method': 'cpf',
-                    'file': file_,
-                    'filename': 'csv_example.csv.gz'
-                }
-            )
+        # Return different header
+        _read_csv_sample.return_value = [
+            ['field1', 'field2', 'field3'], ["1", "2", "3"]
+        ]
+        secret = make('secret.Secret', username='anyname')
+        mmap = make(
+            'methodmapping.MethodMapping',
+            method='cpf',
+            uri='/path/to/storage/cpf',
+            schema={
+                "fields": [
+                    {"name": "field1"},
+                    {"name": "field2"},
+                    {"name": "field3"},
+                ]
+            },
+        )
+        secret.methods.add(mmap)
+        response = self.client.post(
+            reverse('api-upload'),
+            {
+                'SECRET': secret.secret_key,
+                'nome': secret.username,
+                'md5': "md5 value",
+                'method': 'cpf',
+                'file': BytesIO(b"dummy content"),
+                'filename': 'csv_example.csv.gz'
+            }
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertNotIn('error', response.json())
+
+    @mock.patch("api.utils.read_csv_sample")
+    @mock.patch("api.views.md5reader", return_value="md5 value")
+    @mock.patch('secret.models.send_mail')
+    @mock.patch('api.views.upload_to_hdfs')
+    @mock.patch('secret.models.login')
+    def test_validated_schema_is_null_success(
+        self,
+        _email_login,
+        upload_to_hdfs,
+        mm_added,
+        _md5reader,
+        _read_csv_sample,
+    ):
+        _read_csv_sample.return_value = [
+            ['field1', 'field2', 'field3'], ["1", "2", "3"]
+        ]
+        secret = make('secret.Secret', username='anyname')
+        mmap = make(
+            'methodmapping.MethodMapping',
+            method='cpf',
+            uri='/path/to/storage/cpf',
+            schema=None,
+        )
+        secret.methods.add(mmap)
+        response = self.client.post(
+            reverse('api-upload'),
+            {
+                'SECRET': secret.secret_key,
+                'nome': secret.username,
+                'md5': "md5 value",
+                'method': 'cpf',
+                'file': BytesIO(b"dummy content"),
+                'filename': 'csv_example.csv.gz'
+            }
+        )
 
         self.assertEqual(response.status_code, 201)
         self.assertNotIn('error', response.json())
