@@ -8,9 +8,9 @@ pelo convênio firmado entre MPRJ e Governo do Estado do Rio de Janeiro.
 # Executando testes de integração com HDFS
 
 ```
-chmod +x integrations_tests.sh
+chmod +x integration_hdfs_test.sh
 
-./integrations_tests.sh METHOD_NAME USERNAME SECRET_KEY HDFS_URI [FILEPATH, SCHEMA_PATH]
+./integration_hdfs_test.sh METHOD_NAME USERNAME SECRET_KEY HDFS_URI [FILEPATH, SCHEMA_PATH]
 ```
 
 `FILEPATH` = caminho até o arquivo que será enviado ao HDFS com extensão .csv.gz
