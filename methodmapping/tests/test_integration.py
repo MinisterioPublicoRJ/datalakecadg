@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import date as dt
 from hashlib import md5
 from unittest import mock, skipIf
@@ -8,6 +9,8 @@ from django.test import TestCase
 from django.urls import reverse
 from model_mommy.mommy import make
 from unipath import Path
+
+from api.clients import hdfsclient
 
 
 FIXTURES_DIR = Path(__file__).parent.child("fixtures")
@@ -51,6 +54,7 @@ class DatabaseIntegrationTest(TestCase):
         secret_obj.methods.add(method_obj)
         secret_obj.save()
 
+        filename = f'integration_test_{dt.today()}.csv.gz'
         with open(filepath, mode="rb") as file_:
             contents_md5 = md5(file_.read()).hexdigest()
             file_.seek(0)
@@ -62,8 +66,9 @@ class DatabaseIntegrationTest(TestCase):
                     'md5': contents_md5,
                     'method': method,
                     'file': file_,
-                    'filename': f'integration_test_{dt.today()}.csv.gz'
+                    'filename': filename
                 }
             )
 
         self.assertEqual(response.status_code, 201)
+        hdfsclient.status(os.path.join(hdfs_uri, username, filename))
