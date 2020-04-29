@@ -111,8 +111,8 @@ class TestMd5Reader(TestCase):
 
 class TestValidHeader(TestCase):
     @mock.patch('secret.models.login')
-    def test_invalid_csd_comma_separated(self, _mail_login):
-        gzipped_file = open('api/tests/csv_example.csv.gz', 'rb')
+    def test_invalid_csd_NOT_comma_separated(self, _mail_login):
+        gzipped_file = open('api/tests/csv_example_semicolon.csv.gz', 'rb')
         secret = make('secret.Secret', username='anyname')
         mmap = make(
             'methodmapping.MethodMapping',
@@ -151,7 +151,7 @@ class TestValidHeader(TestCase):
 
     @mock.patch('secret.models.login')
     def test_validate_file_header_with_semicolon(self, _mail_login):
-        gzipped_file = open('api/tests/csv_example_semicolon.csv.gz', 'rb')
+        gzipped_file = open('api/tests/csv_example.csv.gz', 'rb')
         secret = make('secret.Secret', username='anyname')
         mmap = make(
             'methodmapping.MethodMapping',
@@ -245,7 +245,7 @@ class TestMethodDestination(TestCase):
 
 class ReadCSVUtilsTest(TestCase):
     def test_read_csv_sample(self):
-        with open('api/tests/csv_example_semicolon.csv.gz', 'rb') as gz_csv:
+        with open('api/tests/csv_example.csv.gz', 'rb') as gz_csv:
             sample_data = read_csv_sample(gz_csv)
 
         expected = [['field1', 'field2', 'field3'], ['1', '2', '3']]

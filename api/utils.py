@@ -41,8 +41,8 @@ def md5reader(uploadedfile):
 
 def read_csv_sample(file_, sample_size=100):
     with gzip.open(file_, 'rt', newline='', encoding='utf-8-sig') as fobj:
-        # force delimiter to be ';'
-        reader = csv.reader(fobj, delimiter=";")
+        # force delimiter to be ','
+        reader = csv.reader(fobj, delimiter=",")
         samples_count = 0
         sample_data = []
         for row in reader:
