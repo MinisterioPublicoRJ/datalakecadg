@@ -31,8 +31,8 @@ p {
 
 .text-size {
     color: rgba(112,112,112,1);
-    height: 90%;
-    margin-bottom: 2em;
+    height: 80%;
+    margin-bottom: 1em;
     overflow-y: auto;
 }
 
