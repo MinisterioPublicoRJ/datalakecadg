@@ -1,6 +1,6 @@
 from django import forms
 
-from api.utils import md5reader
+from api.utils import is_data_valid, md5reader
 
 
 class FileUploadForm(forms.Form):
@@ -26,3 +26,17 @@ class FileUploadForm(forms.Form):
             raise forms.ValidationError("arquivo deve ser GZIP!")
 
         return filename
+
+    def clean(self):
+        cleaned_data = super().clean()
+        valid_data, status = is_data_valid(
+            cleaned_data["username"],
+            cleaned_data["method"],
+            self.files["file"]
+        )
+        if not valid_data:
+            self._errors["schema"] = self.error_class(
+                ["arquivo apresentou estrutura de dados inválida"]
+            )
+
+        return cleaned_data
