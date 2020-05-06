@@ -76,7 +76,7 @@ class TestValidator(TestCase):
         self.assertFalse(is_valid)
         self.assertEqual(
             form.errors["schema"],
-            ["arquivo apresentou estrutura de dados inválida"]
+            ["arquivo apresentou estrutura de dados inválida"],
         )
         self.assertEqual(form.errors["detail-schema"], {"error": "error-msg"})
 
@@ -98,14 +98,11 @@ class TestValidator(TestCase):
         self.assertFalse(is_valid)
         self.assertEqual(
             base_return,
-            {
-                "error": {"md5": ["valor md5 não confere!"]},
-                "md5": 'md5 sum'
-            }
+            {"error": {"md5": ["valor md5 não confere!"]}, "md5": "md5 sum"},
         )
 
     def test_form_stop_first_error(self):
-        "Os dados possuem dois erros. A vaidação deve parar no primeiro error"
+        "Os dados possuem dois erros. A validação deve parar no primeiro erro"
         filename = "FILENAME"
         data = {
             "nome": "USERNAME",

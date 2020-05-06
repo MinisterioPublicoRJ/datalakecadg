@@ -25,7 +25,9 @@ class FileUploadForm(forms.Form):
             if field.disabled:
                 value = self.get_initial_for_field(field, name)
             else:
-                value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
+                value = field.widget.value_from_datadict(
+                    self.data, self.files, self.add_prefix(name)
+                )
             try:
                 if isinstance(field, forms.FileField):
                     initial = self.get_initial_for_field(field, name)
@@ -33,8 +35,8 @@ class FileUploadForm(forms.Form):
                 else:
                     value = field.clean(value)
                 self.cleaned_data[name] = value
-                if hasattr(self, 'clean_%s' % name):
-                    value = getattr(self, 'clean_%s' % name)()
+                if hasattr(self, "clean_%s" % name):
+                    value = getattr(self, "clean_%s" % name)()
                     self.cleaned_data[name] = value
             except forms.ValidationError as e:
                 self.add_error(name, e)
@@ -100,9 +102,7 @@ class FileUploadForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         valid_data, status = is_data_valid(
-            cleaned_data["nome"],
-            cleaned_data["method"],
-            self.files["file"]
+            cleaned_data["nome"], cleaned_data["method"], self.files["file"]
         )
         if not valid_data:
             self._errors["schema"] = self.error_class(

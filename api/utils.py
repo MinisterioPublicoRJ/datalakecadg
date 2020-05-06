@@ -14,14 +14,13 @@ from secret.models import Secret
 
 
 def securedecorator(func):
-
     @wraps(func)
     @require_http_methods(["POST"])
     def wrapper(*args, **kwargs):
         request = args[0]
 
-        username = request.POST.get('nome', -1)
-        secret = request.POST.get('SECRET', -1)
+        username = request.POST.get("nome", -1)
+        secret = request.POST.get("SECRET", -1)
         if Secret.objects.filter(username=username, secret_key=secret):
             return func(*args, **kwargs)
 
@@ -40,7 +39,7 @@ def md5reader(uploadedfile):
 
 
 def read_csv_sample(file_, sample_size=100):
-    with gzip.open(file_, 'rt', newline='', encoding='utf-8-sig') as fobj:
+    with gzip.open(file_, "rt", newline="", encoding="utf-8-sig") as fobj:
         # force delimiter to be ','
         reader = csv.reader(fobj, delimiter=",")
         samples_count = 0
@@ -57,16 +56,12 @@ def read_csv_sample(file_, sample_size=100):
 
 
 def is_data_valid(username, method, file_):
-    dest = Secret.objects.filter(
-        username=username,
-        methods__method=method
-    )
+    dest = Secret.objects.filter(username=username, methods__method=method)
     if dest.exists():
         expected_schema = dest.first().methods.get(method=method).schema
 
         sample_data = read_csv_sample(
-            file_,
-            sample_size=settings.CSV_SAMPLE_SIZE,
+            file_, sample_size=settings.CSV_SAMPLE_SIZE,
         )
         validation = validate(sample_data, schema=expected_schema)
         if validation["valid"]:
@@ -77,13 +72,11 @@ def is_data_valid(username, method, file_):
 
 def get_destination(username, method):
     user_secret = Secret.objects.filter(
-        username=username,
-        methods__method=method
+        username=username, methods__method=method
     )
     if user_secret.exists():
         return path.join(
-            user_secret.get().methods.get(method=method).uri,
-            username
+            user_secret.get().methods.get(method=method).uri, username
         )
 
     raise PermissionDenied()
