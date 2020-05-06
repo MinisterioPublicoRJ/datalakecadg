@@ -98,7 +98,7 @@ class TestValidator(TestCase):
             form.errors["schema"],
             ["arquivo apresentou estrutura de dados inválida"],
         )
-        self.assertEqual(form.errors["detail-schema"], {"error": "error-msg"})
+        self.assertEqual(form.errors["detail_schema"], {"error": "error-msg"})
 
     @mock.patch("api.forms.is_data_valid", return_value=(True, {}))
     @mock.patch("api.forms.md5reader", return_value="md5 sum")

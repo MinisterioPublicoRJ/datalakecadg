@@ -1,7 +1,5 @@
 import logging
 
-from os import path
-
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -16,6 +14,7 @@ logger = logging.getLogger(__name__)
 def upload(request):
     form = FileUploadForm(data=request.POST, files=request.FILES)
     if form.is_valid():
+        # TODO: mover as linhas abaixo para método upload_file no Form
         destination = get_destination(
             form.cleaned_data["nome"], form.cleaned_data["method"]
         )

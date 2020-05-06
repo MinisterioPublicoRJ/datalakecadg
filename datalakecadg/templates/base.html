@@ -9,8 +9,25 @@
 		<link rel="stylesheet" href="{% static 'css/style.css' %}">
 	</head>
   <body data-gr-c-s-loaded="true">
+	<div class="container">
+		<header class="header has-text-centered">
+			<img src="{% static 'img/logo_dados.png' %}" />
+			<svg class="Linha_1">
+				<path id="Linha_1" d="M 0 0 L 0 64">
+				</path>
+			</svg>
+			<img src="{% static 'img/logo_MP.png' %}" />
+		</header>
+		<section class="box columns">
+			<div class="column">
+				<img src="{% static 'img/ilustracao.png' %}" />
+			</div>
+			<div class="column">
     {% block content %}
     {% endblock content %}
+			</div>
+		</section>
+	</div>
 	</body>
   {% block js_script %}
   {% endblock js_script %}

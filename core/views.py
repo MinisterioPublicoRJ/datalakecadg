@@ -18,6 +18,7 @@ def upload_manual(request):
     if request.method == "GET":
         return render(request, template_name, {"form": FileUploadForm})
     else:
+        # TODO: transformar validação abaixo em função
         username = request.POST.get("nome", -1)
         secret = request.POST.get("SECRET", -1)
         if Secret.objects.filter(
@@ -41,6 +42,11 @@ def upload_manual(request):
                         form.cleaned_data["nome"],
                         form.cleaned_data["filename"],
                     )
+                )
+                return render(
+                    request,
+                    template_name,
+                    {"form": form, "success": True}
                 )
             else:
                 return render(request, template_name, {"form": form})

@@ -5,11 +5,11 @@ from api.utils import is_data_valid, md5reader
 
 
 class FileUploadForm(forms.Form):
-    nome = forms.CharField(max_length=255)
-    method = forms.CharField(max_length=255)
-    filename = forms.CharField(max_length=255)
-    md5 = forms.CharField(max_length=32)
-    file = forms.FileField()
+    nome = forms.CharField(max_length=255, label="Nome")
+    method = forms.CharField(max_length=255, label="Método")
+    filename = forms.CharField(max_length=255, label="Nome do arquivo")
+    md5 = forms.CharField(max_length=32, label="Valor MD5", required=False)
+    file = forms.FileField(label="Arquivo")
 
     def __init__(self, disable_md5=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -111,6 +111,6 @@ class FileUploadForm(forms.Form):
             self._errors["schema"] = self.error_class(
                 ["arquivo apresentou estrutura de dados inválida"]
             )
-            self._errors["detail-schema"] = status
+            self._errors["detail_schema"] = status
 
         return cleaned_data

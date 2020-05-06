@@ -2,38 +2,73 @@
 {% block content %}
 <form method="POST" enctype="multipart/form-data" action="{% url 'core:upload-manual' %}">
    {% csrf_token %}
-    <p>
-    <label for="id_secret">Chave Secreta:</label>
-    <input id="id_secret" type="text" name="SECRET">
-    </p>
-    <p>
-    <label for="id_nome">Nome de usuário:</label>
-    {{ form.nome }}
-    </p>
-    <p>
-    <label for="id_method">Nome do método:</label>
-    {{ form.method }}
-    </p>
-    <p>
-    <label for="id_filename">Nome do arquivo:</label>
-    {{ form.filename }}
-    </p>
-    <p>
-    <label for="id_md5">Valor MD5:</label>
-    {{ form.md5 }}
-    </p>
-    {{ form.file }}
-    <input type="submit" value="Enviar">
+    <div class="columns">
+        <div class="column is-one-third">
+            <label for="id_secret">Chave Secreta:</label>
+        </div>
+        <div class="column">
+            <input id="id_secret" type="text" name="SECRET" required>
+        </div>
+    </div>
+    <div class="columns">
+        <div class="column is-one-third">
+            <label for="id_nome">Nome de usuário:</label>
+        </div>
+        <div class="column">
+            {{ form.nome }}
+        </div>
+    </div>
+    <div class="columns">
+        <div class="column is-one-third">
+            <label for="id_method">Nome do método:</label>
+        </div>
+        <div class="column">
+            {{ form.method }}
+        </div>
+    </div>
+    <div class="columns">
+        <div class="column is-one-third">
+            <label for="id_filename">Nome do arquivo:</label>
+        </div>
+        <div class="column">
+            {{ form.filename }}
+        </div>
+    </div>
+    <div class="columns">
+        <div class="column">
+            {{ form.file }}
+        </div>
+    </div>
+    <div class="columns">
+        <div class="buttons column">
+            <input type="submit" value="Enviar" class="button is-info is-outlined is-uppercase">
+        </div>
+    </div>
   </form>
-  {% if form.errors %}
-  <p>Erros de envio</p>
-   {% for field, error in form.errors.items %}
-     {{ field }} - {{ error }}
-    {% endfor %}
-  {% endif %}
 
-  {% if auth_error %}
-  <p>Erros de credenciais</p>
-      {{ auth_error }}
-  {% endif %}
+<div class="section">
+  <div class="content">
+        {% if form.errors %}
+          <p class="errors">Erro de envio</p>
+          {% for field in form %}
+              {% for error in field.errors %}
+                 {{ field.label }} - {{ error }}
+              {% endfor %}
+           {% endfor %}
+        {% endif %}
+        {% if 'schema' in form.errors %}
+            <p>{{ form.errors.schema }}</p>
+        {% endif %}
+
+      {% if auth_error %}
+        <p class="errors">Erro de credenciais</p>
+        {{ auth_error }}
+    {% endif %}
+
+    {% if success %}
+        <p class="success">Tudo certo!</p>
+            <p>O arquivo foi enviado com sucesso</p>
+    {% endif %}
+ </div>
+</div>
 {% endblock content %}
