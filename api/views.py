@@ -3,19 +3,12 @@ import logging
 from os import path
 
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 
 from api.forms import FileUploadForm
-from .clients import hdfsclient
-from .utils import securedecorator, get_destination
+from .utils import securedecorator, get_destination, upload_to_hdfs
 
 logger = logging.getLogger(__name__)
-
-
-def upload_to_hdfs(file, filename, destination):
-    hdfsclient.write(path.join(destination, filename), file, overwrite=True)
 
 
 @securedecorator
@@ -35,9 +28,3 @@ def upload(request):
         )
 
     return JsonResponse(form.base_return, status=form.status_code)
-
-
-@require_http_methods(["GET"])
-def upload_manual(request):
-    template_name = "core/upload_manual.html"
-    return render(request, template_name, {"form": FileUploadForm})

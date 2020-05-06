@@ -13,7 +13,7 @@ class FileUploadForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.md5_ = md5reader(self.files["file"])
+        self.md5_ = md5reader(self.files["file"]) if self.files else ""
 
     # TODO: Talvez faça sentido criar uma classe sem herdar de forms.Form
     # e chamaar os métods de validação de cada campo.

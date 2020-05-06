@@ -1,8 +1,17 @@
 {% load staticfiles %}
+<!DOCTYPE html>
 <html>
-  <title>Datalake CADG</title>
-  <body>
-     {% block content %}
-     {% endblock %}
-  </body>
+	<head>
+		<meta charset="utf-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<title>MPRJ | API Dados</title>
+		<link rel="stylesheet" href="{% static 'css/bulma.min.css' %}">
+		<link rel="stylesheet" href="{% static 'css/style.css' %}">
+	</head>
+  <body data-gr-c-s-loaded="true">
+    {% block content %}
+    {% endblock content %}
+	</body>
+  {% block js_script %}
+  {% endblock js_script %}
 </html>

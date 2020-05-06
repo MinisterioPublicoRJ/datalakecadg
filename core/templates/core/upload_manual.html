@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<form method="POST" enctype="multipart/form-data" action="{% url 'core:upload-manual' %}">
+   {% csrf_token %}
+    <p>
+    <label for="id_secret">Chave Secreta:</label>
+    <input id="id_secret" type="text" name="SECRET">
+    </p>
+    <p>
+    <label for="id_nome">Nome de usuário:</label>
+    {{ form.nome }}
+    </p>
+    <p>
+    <label for="id_method">Nome do método:</label>
+    {{ form.method }}
+    </p>
+    <p>
+    <label for="id_filename">Nome do arquivo:</label>
+    {{ form.filename }}
+    </p>
+    <p>
+    <label for="id_md5">Valor MD5:</label>
+    {{ form.md5 }}
+    </p>
+    {{ form.file }}
+    <input type="submit" value="Enviar">
+  </form>
+  {% if form.errors %}
+  <p>Erros de envio</p>
+   {% for field, error in form.errors.items %}
+     {{ field }} - {{ error }}
+    {% endfor %}
+  {% endif %}
+
+  {% if auth_error %}
+  <p>Erros de credenciais</p>
+      {{ auth_error }}
+  {% endif %}
+{% endblock content %}

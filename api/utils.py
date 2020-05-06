@@ -10,6 +10,7 @@ from functools import wraps
 from goodtables import validate
 from hashlib import md5
 
+from api.clients import hdfsclient
 from secret.models import Secret
 
 
@@ -80,3 +81,7 @@ def get_destination(username, method):
         )
 
     raise PermissionDenied()
+
+
+def upload_to_hdfs(file, filename, destination):
+    hdfsclient.write(path.join(destination, filename), file, overwrite=True)
