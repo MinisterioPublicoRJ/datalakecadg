@@ -13,11 +13,9 @@ class TestValidator(TestCase):
             "username": "USERNAME",
             "method": "METHOD-NAME",
             "filename": filename,
-            "sent_md5": "MD5"
+            "sent_md5": "MD5",
         }
-        file_to_send = {
-            "file": SimpleUploadedFile(filename, b"content")
-        }
+        file_to_send = {"file": SimpleUploadedFile(filename, b"content")}
         form = FileUploadForm(data=data, files=file_to_send)
         is_valid = form.is_valid()
 
@@ -31,13 +29,27 @@ class TestValidator(TestCase):
             "username": "USERNAME",
             "method": "METHOD-NAME",
             "filename": filename,
-            "sent_md5": "WRONG MD5"
+            "sent_md5": "WRONG MD5",
         }
-        file_to_send = {
-            "file": SimpleUploadedFile(filename, b"content")
-        }
+        file_to_send = {"file": SimpleUploadedFile(filename, b"content")}
         form = FileUploadForm(data=data, files=file_to_send)
         is_valid = form.is_valid()
 
         self.assertFalse(is_valid)
-        self.assertEqual(form.errors['sent_md5'], ['valor md5 não confere!'])
+        self.assertEqual(form.errors["sent_md5"], ["valor md5 não confere!"])
+
+    @mock.patch("api.forms.md5reader", return_value="MD5")
+    def test_invalid_file_extension(self, _md5reader):
+        filename = "FILENAME"
+        data = {
+            "username": "USERNAME",
+            "method": "METHOD-NAME",
+            "filename": filename,
+            "sent_md5": "WRONG MD5",
+        }
+        file_to_send = {"file": SimpleUploadedFile(filename, b"content")}
+        form = FileUploadForm(data=data, files=file_to_send)
+        is_valid = form.is_valid()
+
+        self.assertFalse(is_valid)
+        self.assertEqual(form.errors["filename"], ["arquivo deve ser GZIP!"])

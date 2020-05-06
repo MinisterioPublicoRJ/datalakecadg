@@ -17,3 +17,12 @@ class FileUploadForm(forms.Form):
             raise forms.ValidationError("valor md5 não confere!")
 
         return sent_md5
+
+    def clean_filename(self):
+        filename = self.cleaned_data["filename"]
+        if not filename.endswith(".gz") and not self.files[
+            "file"
+        ].name.endswith(".gz"):
+            raise forms.ValidationError("arquivo deve ser GZIP!")
+
+        return filename
