@@ -1,5 +1,6 @@
 import csv
 import gzip
+import logging
 
 from os import path
 
@@ -12,6 +13,9 @@ from hashlib import md5
 
 from api.clients import hdfsclient
 from secret.models import Secret
+
+
+logger = logging.getLogger(__name__)
 
 
 def securedecorator(func):
@@ -69,6 +73,12 @@ def is_data_valid(username, method, file_):
             return True, {}
         else:
             return False, validation["tables"][0]["errors"]
+
+    logger.info(
+        "Erro ao encontrar método para usuário {0} - {1}".format(
+            username, method)
+    )
+    return False, "Destino para upload não existe"
 
 
 def get_destination(username, method):

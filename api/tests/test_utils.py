@@ -147,6 +147,31 @@ class TestValidHeader(TestCase):
         self.assertTrue(valid)
         self.assertFalse(len(status))
 
+    @mock.patch("secret.models.login")
+    def test_invlid_destination(self, _mail_login):
+        gzipped_file = open("api/tests/csv_example.csv.gz", "rb")
+        secret = make("secret.Secret", username="anyname")
+        mmap = make(
+            "methodmapping.MethodMapping",
+            method="cpf",
+            uri="/path/to/storage/cpf",
+            schema={
+                "fields": [
+                    {"name": "field1"},
+                    {"name": "field2"},
+                    {"name": "field3"},
+                ]
+            },
+        )
+        secret.methods.add(mmap)
+
+        valid, status = is_data_valid(
+            "wrong-user", "wront-method", gzipped_file
+        )
+
+        self.assertFalse(valid)
+        self.assertEqual(status, "Destino para upload não existe")
+
 
 class TestMethodDestination(TestCase):
     @mock.patch("secret.models.login")
