@@ -11,9 +11,10 @@ class FileUploadForm(forms.Form):
     md5 = forms.CharField(max_length=32)
     file = forms.FileField()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, disable_md5=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.md5_ = md5reader(self.files["file"]) if self.files else ""
+        self.disable_md5 = disable_md5
 
     # TODO: Talvez faça sentido criar uma classe sem herdar de forms.Form
     # e chamaar os métods de validação de cada campo.
@@ -87,7 +88,7 @@ class FileUploadForm(forms.Form):
 
     def clean_md5(self):
         md5 = self.cleaned_data["md5"]
-        if md5 != self.md5_:
+        if not self.disable_md5 and md5 != self.md5_:
             raise forms.ValidationError("valor md5 não confere!")
 
         return md5

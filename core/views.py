@@ -22,7 +22,11 @@ def upload_manual(request):
         username = request.POST.get("nome", -1)
         secret = request.POST.get("SECRET", -1)
         if Secret.objects.filter(username=username, secret_key=secret).exists():
-            form = FileUploadForm(data=request.POST, files=request.FILES)
+            form = FileUploadForm(
+                data=request.POST,
+                files=request.FILES,
+                disable_md5=True
+            )
             if form.is_valid():
                 destination = get_destination(
                     form.cleaned_data["nome"], form.cleaned_data["method"]

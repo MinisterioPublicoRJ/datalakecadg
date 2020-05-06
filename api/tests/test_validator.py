@@ -42,6 +42,26 @@ class TestValidator(TestCase):
         self.assertEqual(form.errors["md5"], ["valor md5 não confere!"])
 
     @mock.patch("api.forms.is_data_valid", return_value=(True, {}))
+    @mock.patch("api.forms.md5reader", return_value="md5 sum")
+    def test_disable_md5_validation(self, _md5reader, _is_data_valid):
+        filename = "FILENAME.gz"
+        data = {
+            "nome": "USERNAME",
+            "method": "METHOD-NAME",
+            "filename": filename,
+            "md5": "WRONG MD5",
+        }
+        file_to_send = {"file": SimpleUploadedFile(filename, b"content")}
+        form = FileUploadForm(
+            data=data,
+            files=file_to_send,
+            disable_md5=True
+        )
+        is_valid = form.is_valid()
+
+        self.assertTrue(is_valid)
+
+    @mock.patch("api.forms.is_data_valid", return_value=(True, {}))
     @mock.patch("api.forms.md5reader", return_value="MD5")
     def test_invalid_file_extension(self, _md5reader, _is_data_valid):
         filename = "FILENAME"
