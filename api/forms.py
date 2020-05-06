@@ -15,6 +15,17 @@ class FileUploadForm(forms.Form):
         if self.is_bound:
             return {"md5": self.md5_, "error": self._errors}
 
+    @property
+    def status_code(self):
+        error_types = [list(error.keys())[0] for error in self._errors]
+        status = 200
+        if "sent_md5" in error_types or "schema" in error_types:
+            status = 400
+        elif "filename" in error_types:
+            status = 415
+
+        return status
+
     def clean_sent_md5(self):
         sent_md5 = self.cleaned_data["sent_md5"]
         file_ = self.files["file"]

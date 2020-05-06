@@ -102,3 +102,19 @@ class TestValidator(TestCase):
                 "md5": 'md5 sum'
             }
         )
+
+    @mock.patch.object(FileUploadForm, "is_valid")
+    def test_create_status_code(self, _is_valid):
+        form_400_schema = FileUploadForm(data=dict(), files="file")
+        form_400_schema._errors = [{"schema": "schema invalido"}]
+        form_415 = FileUploadForm(data=dict(), files="file")
+        form_415._errors = [{"filename": "arquivo deve ser gzip"}]
+        form_400_md5 = FileUploadForm(data=dict(), files="file")
+        form_400_md5._errors = [{"sent_md5": "md5 não confere"}]
+        form_200 = FileUploadForm(data=dict(), files="file")
+        form_200._errors = []
+
+        self.assertEqual(form_400_schema.status_code, 400)
+        self.assertEqual(form_400_md5.status_code, 400)
+        self.assertEqual(form_415.status_code, 415)
+        self.assertEqual(form_200.status_code, 200)
