@@ -1,9 +1,8 @@
-import gzip
-
 from hashlib import md5
 from io import BytesIO
 from unittest import mock
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import TestCase
 from model_mommy.mommy import make
@@ -33,7 +32,6 @@ class TestUpload(TestCase):
         contents_file = BytesIO()
         contents_file.write(contents)
         contents_file.seek(0)
-
 
         response = self.client.post(
             reverse('api-upload'),
@@ -67,7 +65,7 @@ class TestUpload(TestCase):
                 'nome': secret.username,
                 'md5': 'wrongmd5',
                 'method': 'cpf',
-                'file': contents_file,
+                'file': SimpleUploadedFile("test.csv.gz", b"filecontents"),
                 'filename': 'test.csv.gz'
             }
         )

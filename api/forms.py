@@ -83,7 +83,6 @@ class FileUploadForm(forms.Form):
 
     def clean_md5(self):
         md5 = self.cleaned_data["md5"]
-        file_ = self.files["file"]
         if md5 != self.md5_:
             raise forms.ValidationError("valor md5 não confere!")
 
@@ -91,7 +90,7 @@ class FileUploadForm(forms.Form):
 
     def clean_filename(self):
         filename = self.cleaned_data["filename"]
-        if not filename.endswith(".gz") and not self.files[
+        if not filename.endswith(".gz") or not self.files[
             "file"
         ].name.endswith(".gz"):
             raise forms.ValidationError("arquivo deve ser GZIP!")
@@ -109,5 +108,6 @@ class FileUploadForm(forms.Form):
             self._errors["schema"] = self.error_class(
                 ["arquivo apresentou estrutura de dados inválida"]
             )
+            self._errors["detail-schema"] = status
 
         return cleaned_data
