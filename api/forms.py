@@ -15,6 +15,8 @@ class FileUploadForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.md5_ = md5reader(self.files["file"])
 
+    # TODO: Talvez faça sentido criar uma classe sem herdar de forms.Form
+    # e chamaar os métods de validação de cada campo.
     # Os métodos _clean_fields e full_clean foram alterados para que a
     # validação pare no primeiro erro
     def _clean_fields(self):

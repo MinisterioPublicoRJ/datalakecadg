@@ -257,3 +257,11 @@ class TestUpload(TestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json()["error"], {})
+
+
+class TestUploadManual(TestCase):
+    def test_correct_upload(self):
+        response = self.client.get(reverse("api-upload-manual"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "core/upload_manual.html")
