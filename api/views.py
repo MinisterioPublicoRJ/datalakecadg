@@ -5,11 +5,10 @@ from os import path
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from api.forms import FileUploadForm
 from .clients import hdfsclient
 from .utils import (
-    md5reader,
     securedecorator,
-    is_data_valid,
     get_destination)
 
 logger = logging.getLogger(__name__)
@@ -26,53 +25,23 @@ def upload_to_hdfs(file, filename, destination):
 @securedecorator
 @csrf_exempt
 def upload(request):
-    file = request.FILES['file']
-    username = request.POST.get('nome')
-    method = request.POST.get('method')
-    filename = request.POST.get('filename')
-    sent_md5 = request.POST.get('md5')
-
-    BASE_RETURN = {
-        'md5': md5reader(file),
-    }
-
-    if BASE_RETURN['md5'] != sent_md5:
-        logger.error(
-            'username %s -> %s presented MD5 checksum error'
-            % (username, filename)
+    form = FileUploadForm(data=request.POST, files=request.FILES)
+    if form.is_valid():
+        destination = get_destination(
+            form.cleaned_data["nome"],
+            form.cleaned_data["method"]
         )
-        BASE_RETURN['error'] = 'md5 did not match'
-        return JsonResponse(BASE_RETURN, status=400)
-
-    # Validate data file
-    if not file.name.endswith('.gz') and not filename.endswith('.gz'):
-        logger.error(
-            'username: %s -> %s file is not a gzip'
-            % (username, filename)
+        upload_to_hdfs(
+            form.files["file"],
+            form.cleaned_data["filename"],
+            destination
         )
-        BASE_RETURN['error'] = 'File must be a GZIP csv'
-        return JsonResponse(BASE_RETURN, status=415)
-
-    # Validate data schema
-    valid_data, status = is_data_valid(username, method, file.file)
-    if not valid_data:
-        logger.error(
-            'username: %s -> %s presented a non-valid schema'
-            % (username, filename)
+        logger.info(
+            'username %s -> %s successfully uploaded to HDFS'
+            % (form.cleaned_data["nome"], form.cleaned_data["filename"])
         )
-        BASE_RETURN['error'] = status
-        return JsonResponse(BASE_RETURN, status=400)
-
-    destination = get_destination(username, method)
-
-    upload_to_hdfs(file.file, filename, destination)
-
-    logger.info(
-        'username %s -> %s successfully uploaded to HDFS'
-        % (username, filename)
-    )
 
     return JsonResponse(
-        BASE_RETURN,
-        status=201
+        form.base_return,
+        status=form.status_code
     )
