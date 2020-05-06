@@ -38,6 +38,7 @@ class TestValidator(TestCase):
         is_valid = form.is_valid()
 
         self.assertFalse(is_valid)
+        self.assertEqual(form.md5_, "md5 sum")
         self.assertEqual(form.errors["sent_md5"], ["valor md5 não confere!"])
 
     @mock.patch("api.forms.is_data_valid", return_value=(True, {}))
@@ -76,4 +77,28 @@ class TestValidator(TestCase):
         self.assertEqual(
             form.errors["schema"],
             ["arquivo apresentou estrutura de dados inválida"]
+        )
+
+    @mock.patch("api.forms.is_data_valid", return_value=(True, {}))
+    @mock.patch("api.forms.md5reader", return_value="md5 sum")
+    def test_create_base_return(self, _md5reader, _is_data_valid):
+        filename = "FILENAME.gz"
+        data = {
+            "username": "USERNAME",
+            "method": "METHOD-NAME",
+            "filename": filename,
+            "sent_md5": "WRONG MD5",
+        }
+        file_to_send = {"file": SimpleUploadedFile(filename, b"content")}
+        form = FileUploadForm(data=data, files=file_to_send)
+        is_valid = form.is_valid()
+        base_return = form.base_return
+
+        self.assertFalse(is_valid)
+        self.assertEqual(
+            base_return,
+            {
+                "error": {"sent_md5": ["valor md5 não confere!"]},
+                "md5": 'md5 sum'
+            }
         )

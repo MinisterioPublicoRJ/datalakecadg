@@ -10,10 +10,16 @@ class FileUploadForm(forms.Form):
     sent_md5 = forms.CharField(max_length=32)
     file = forms.FileField()
 
+    @property
+    def base_return(self):
+        if self.is_bound:
+            return {"md5": self.md5_, "error": self._errors}
+
     def clean_sent_md5(self):
         sent_md5 = self.cleaned_data["sent_md5"]
         file_ = self.files["file"]
-        if sent_md5 != md5reader(file_):
+        self.md5_ = md5reader(file_)
+        if sent_md5 != self.md5_:
             raise forms.ValidationError("valor md5 não confere!")
 
         return sent_md5
