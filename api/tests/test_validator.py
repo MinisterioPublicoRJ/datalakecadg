@@ -95,6 +95,7 @@ class TestValidator(TestCase):
         is_valid = form.is_valid()
 
         self.assertTrue(is_valid)
+        self.assertEqual(form.cleaned_data["filename"], "FILENAME.csv.gz")
 
     @mock.patch.object(FileUploadForm, "compress")
     @mock.patch("api.forms.is_data_valid", return_value=(True, {}))
@@ -114,6 +115,7 @@ class TestValidator(TestCase):
         is_valid = form.is_valid()
 
         self.assertTrue(is_valid)
+        self.assertEqual(form.cleaned_data["filename"], "FILENAME.csv.gz")
         _compress.assert_called_once_with(file_)
 
     @mock.patch("api.forms.is_data_valid", return_value=(True, {}))

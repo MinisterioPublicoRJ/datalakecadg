@@ -251,7 +251,7 @@ class ReadCSVUtilsTest(TestCase):
         self.assertEqual(sample_data, expected)
 
     def test_read_csv_sample(self):
-        with open("api/tests/csv_example.csv", "r") as gz_csv:
+        with open("api/tests/csv_example.csv", "rb") as gz_csv:
             sample_data = read_csv_sample(gz_csv)
 
         expected = [["field1", "field2", "field3"], ["1", "2", "3"]]

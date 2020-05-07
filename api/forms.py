@@ -77,7 +77,7 @@ class FileUploadForm(forms.Form):
 
     @property
     def is_csv(self):
-        return self.cleaned_data["filename"].endswith(".csv")
+        return self.files["file"].name.endswith(".csv")
 
     @property
     def opener(self):
@@ -148,5 +148,6 @@ class FileUploadForm(forms.Form):
 
         if self.is_csv:
             cleaned_data["file"] = self.compress(cleaned_data["file"])
+            cleaned_data["filename"] = cleaned_data["filename"] + ".gz"
 
         return cleaned_data

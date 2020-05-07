@@ -1,6 +1,7 @@
 import csv
 import gzip
 import logging
+from io import StringIO
 from os import path
 
 from django.conf import settings
@@ -47,7 +48,8 @@ def read_csv_sample(file_, sample_size=100):
     if file_.name.endswith(".gz"):
         fobj = gzip.open(file_, mode="rt", newline="", encoding=FILE_ENCODING)
     else:
-        fobj = file_
+        fobj = StringIO(file_.read().decode(FILE_ENCODING))
+        fobj.seek(0)
 
     # force delimiter to be ','
     reader = csv.reader(fobj, delimiter=",")
