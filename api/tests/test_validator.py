@@ -69,14 +69,32 @@ class TestValidator(TestCase):
             "nome": "USERNAME",
             "method": "METHOD-NAME",
             "filename": filename,
-            "md5": "WRONG MD5",
+            "md5": "MD5",
         }
         file_to_send = {"file": SimpleUploadedFile(filename, b"content")}
         form = FileUploadForm(data=data, files=file_to_send)
         is_valid = form.is_valid()
 
         self.assertFalse(is_valid)
-        self.assertEqual(form.errors["filename"], ["arquivo deve ser GZIP!"])
+        self.assertEqual(
+            form.errors["filename"], ["arquivo deve ser .CSV ou .CSV.GZIP!"]
+        )
+
+    @mock.patch("api.forms.is_data_valid", return_value=(True, {}))
+    @mock.patch("api.forms.md5reader", return_value="MD5")
+    def test_also_accepts_pure_csv_files(self, _md5reader, _is_data_valid):
+        filename = "FILENAME.csv"
+        data = {
+            "nome": "USERNAME",
+            "method": "METHOD-NAME",
+            "filename": filename,
+            "md5": "MD5",
+        }
+        file_to_send = {"file": SimpleUploadedFile(filename, b"content")}
+        form = FileUploadForm(data=data, files=file_to_send)
+        is_valid = form.is_valid()
+
+        self.assertTrue(is_valid)
 
     @mock.patch("api.forms.is_data_valid")
     @mock.patch("api.forms.md5reader", return_value="MD5")

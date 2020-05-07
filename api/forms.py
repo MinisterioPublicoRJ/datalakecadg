@@ -95,10 +95,11 @@ class FileUploadForm(forms.Form):
 
     def clean_filename(self):
         filename = self.cleaned_data["filename"]
-        if not filename.endswith(".gz") or not self.files[
+        good_exts = (".gz", ".csv")
+        if not filename.endswith(good_exts) or not self.files[
             "file"
-        ].name.endswith(".gz"):
-            raise forms.ValidationError("arquivo deve ser GZIP!")
+        ].name.endswith(good_exts):
+            raise forms.ValidationError("arquivo deve ser .CSV ou .CSV.GZIP!")
 
         return filename
 
