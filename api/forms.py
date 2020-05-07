@@ -1,7 +1,10 @@
+import gzip
+from functools import partial
+
 from django import forms
 from django.forms.utils import ErrorDict
 
-from api.utils import is_data_valid, md5reader
+from api.utils import FILE_ENCODING, is_data_valid, md5reader
 
 
 class FileUploadForm(forms.Form):
@@ -67,6 +70,17 @@ class FileUploadForm(forms.Form):
             clean_method()
             if self._errors:
                 break
+
+    @property
+    def opener(self):
+        if self.cleaned_data["filename"].endswith(".csv"):
+            opener = partial(open, mode="r", encoding=FILE_ENCODING)
+        else:
+            opener = partial(
+                gzip.open, mode="rt", newline="", encoding=FILE_ENCODING
+            )
+
+        return opener
 
     @property
     def base_return(self):

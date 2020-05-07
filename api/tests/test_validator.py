@@ -1,8 +1,11 @@
+import gzip
+from functools import partial
 from unittest import TestCase, mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from api.forms import FileUploadForm
+from api import utils
 
 
 class TestValidator(TestCase):
@@ -95,6 +98,44 @@ class TestValidator(TestCase):
         is_valid = form.is_valid()
 
         self.assertTrue(is_valid)
+
+    @mock.patch("api.forms.is_data_valid", return_value=(True, {}))
+    @mock.patch("api.forms.md5reader", return_value="MD5")
+    def test_define_file_opener(self, _md5reader, _is_data_valid):
+        filename_csv = "FILENAME.csv"
+        filename_gz = "FILENAME.csv.gz"
+        data_csv = {
+            "nome": "USERNAME",
+            "method": "METHOD-NAME",
+            "filename": filename_csv,
+            "md5": "MD5",
+        }
+        file_to_send_csv = {
+            "file": SimpleUploadedFile(filename_csv, b"content")
+        }
+        data_gz = {
+            "nome": "USERNAME",
+            "method": "METHOD-NAME",
+            "filename": filename_gz,
+            "md5": "MD5",
+        }
+        file_to_send_gz = {"file": SimpleUploadedFile(filename_gz, b"content")}
+        form_csv = FileUploadForm(data=data_csv, files=file_to_send_csv)
+        form_csv.is_valid()
+        form_gz = FileUploadForm(data=data_gz, files=file_to_send_gz)
+        form_gz.is_valid()
+
+        opener_csv = form_csv.opener
+        opener_gz = form_gz.opener
+        expected_csv = partial(open, mode="r", encoding=utils.FILE_ENCODING)
+        expected_gz = partial(
+            gzip.open, mode="rt", newline="", encoding=utils.FILE_ENCODING
+        )
+
+        self.assertEqual(opener_csv.func, expected_csv.func)
+        self.assertEqual(opener_csv.keywords, expected_csv.keywords)
+        self.assertEqual(opener_gz.func, expected_gz.func)
+        self.assertEqual(opener_gz.keywords,  expected_gz.keywords)
 
     @mock.patch("api.forms.is_data_valid")
     @mock.patch("api.forms.md5reader", return_value="MD5")

@@ -16,6 +16,7 @@ from secret.models import Secret
 
 
 logger = logging.getLogger(__name__)
+FILE_ENCODING = "utf-8-sig"
 
 
 def securedecorator(func):
@@ -44,7 +45,7 @@ def md5reader(uploadedfile):
 
 
 def read_csv_sample(file_, sample_size=100):
-    with gzip.open(file_, "rt", newline="", encoding="utf-8-sig") as fobj:
+    with gzip.open(file_, "rt", newline="", encoding=FILE_ENCODING) as fobj:
         # force delimiter to be ','
         reader = csv.reader(fobj, delimiter=",")
         samples_count = 0
