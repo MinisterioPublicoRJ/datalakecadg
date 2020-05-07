@@ -11,7 +11,9 @@ from api.utils import FILE_ENCODING, is_data_valid, md5reader
 class FileUploadForm(forms.Form):
     nome = forms.CharField(max_length=255, label="Nome")
     method = forms.CharField(max_length=255, label="Método")
-    filename = forms.CharField(max_length=255, label="Nome do arquivo")
+    filename = forms.CharField(
+        max_length=255, label="Nome do arquivo", required=False
+    )
     md5 = forms.CharField(max_length=32, label="Valor MD5", required=False)
     file = forms.FileField(label="Arquivo")
 
@@ -116,11 +118,13 @@ class FileUploadForm(forms.Form):
         return md5
 
     def clean_filename(self):
-        filename = self.cleaned_data["filename"]
+        given_filename = self.cleaned_data.get("filename")
+        original_filename = self.files["file"].name
+        filename = given_filename or original_filename
         good_exts = (".gz", ".csv")
-        if not filename.endswith(good_exts) or not self.files[
-            "file"
-        ].name.endswith(good_exts):
+        if not filename.endswith(good_exts) or not original_filename.endswith(
+            good_exts
+        ):
             raise forms.ValidationError("arquivo deve ser .CSV ou .CSV.GZIP!")
 
         return filename
