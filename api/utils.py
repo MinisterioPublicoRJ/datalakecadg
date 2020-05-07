@@ -82,7 +82,8 @@ def is_data_valid(username, method, file_):
 
     logger.info(
         "Erro ao encontrar método para usuário {0} - {1}".format(
-            username, method)
+            username, method
+        )
     )
     return False, "Destino para upload não existe"
 

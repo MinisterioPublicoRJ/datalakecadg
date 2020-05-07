@@ -127,7 +127,7 @@ class FileUploadForm(forms.Form):
 
     def compress(self, file_):
         out = BytesIO()
-        with gzip.GzipFile(fileobj=out, mode='w') as fobj:
+        with gzip.GzipFile(fileobj=out, mode="w") as fobj:
             fobj.write(file_.read())
             out.seek(0)
 
@@ -136,9 +136,7 @@ class FileUploadForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         valid_data, status = is_data_valid(
-            cleaned_data["nome"],
-            cleaned_data["method"],
-            self.files["file"]
+            cleaned_data["nome"], cleaned_data["method"], self.files["file"]
         )
         if not valid_data:
             self._errors["schema"] = self.error_class(
