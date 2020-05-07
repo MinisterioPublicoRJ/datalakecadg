@@ -80,8 +80,8 @@ class TestUpload(TestCase):
     @mock.patch("secret.models.send_mail")
     @mock.patch("api.views.upload_to_hdfs")
     @mock.patch("secret.models.login")
-    def test_validate_sent_data(self, _login, upload_to_hdfs, mm_added):
-        with open("api/tests/csv_example.csv", "rt", newline="") as file_:
+    def test_validate_data_extension(self, _login, upload_to_hdfs, mm_added):
+        with open("api/tests/csv_example.xls", "rt", newline="") as file_:
             contents_md5 = md5(file_.read().encode()).hexdigest()
             file_.seek(0)
 
@@ -100,7 +100,7 @@ class TestUpload(TestCase):
                     "md5": contents_md5,
                     "method": "cpf",
                     "file": file_,
-                    "filename": "csv_example.csv",
+                    "filename": "csv_example.xls",
                 },
             )
 

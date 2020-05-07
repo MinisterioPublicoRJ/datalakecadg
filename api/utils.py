@@ -1,7 +1,6 @@
 import csv
 import gzip
 import logging
-
 from os import path
 
 from django.conf import settings
@@ -45,18 +44,22 @@ def md5reader(uploadedfile):
 
 
 def read_csv_sample(file_, sample_size=100):
-    with gzip.open(file_, "rt", newline="", encoding=FILE_ENCODING) as fobj:
-        # force delimiter to be ','
-        reader = csv.reader(fobj, delimiter=",")
-        samples_count = 0
-        sample_data = []
-        for row in reader:
-            sample_data.append(row)
-            samples_count += 1
-            if samples_count == sample_size:
-                break
+    if file_.name.endswith(".gz"):
+        fobj = gzip.open(file_, mode="rt", newline="", encoding=FILE_ENCODING)
+    else:
+        fobj = file_
 
-        fobj.seek(0)
+    # force delimiter to be ','
+    reader = csv.reader(fobj, delimiter=",")
+    samples_count = 0
+    sample_data = []
+    for row in reader:
+        sample_data.append(row)
+        samples_count += 1
+        if samples_count == sample_size:
+            break
+
+    fobj.seek(0)
 
     return sample_data
 

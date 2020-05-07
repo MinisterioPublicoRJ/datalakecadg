@@ -72,8 +72,12 @@ class FileUploadForm(forms.Form):
                 break
 
     @property
+    def is_csv(self):
+        return self.cleaned_data["filename"].endswith(".csv")
+
+    @property
     def opener(self):
-        if self.cleaned_data["filename"].endswith(".csv"):
+        if self.is_csv:
             opener = partial(open, mode="r", encoding=FILE_ENCODING)
         else:
             opener = partial(
@@ -120,7 +124,9 @@ class FileUploadForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         valid_data, status = is_data_valid(
-            cleaned_data["nome"], cleaned_data["method"], self.files["file"]
+            cleaned_data["nome"],
+            cleaned_data["method"],
+            self.files["file"]
         )
         if not valid_data:
             self._errors["schema"] = self.error_class(
