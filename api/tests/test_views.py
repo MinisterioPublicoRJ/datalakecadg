@@ -81,7 +81,7 @@ class TestUpload(TestCase):
     @mock.patch("api.views.upload_to_hdfs")
     @mock.patch("secret.models.login")
     def test_validate_data_extension(self, _login, upload_to_hdfs, mm_added):
-        with open("api/tests/csv_example.xls", "rt", newline="") as file_:
+        with open("api/tests/csv_example.tsv", "rt", newline="") as file_:
             contents_md5 = md5(file_.read().encode()).hexdigest()
             file_.seek(0)
 
@@ -100,14 +100,14 @@ class TestUpload(TestCase):
                     "md5": contents_md5,
                     "method": "cpf",
                     "file": file_,
-                    "filename": "csv_example.xls",
+                    "filename": "csv_example.tsv",
                 },
             )
 
             self.assertEqual(response.status_code, 415)
             self.assertEqual(
                 response.json()["error"]["filename"],
-                ["arquivo deve ser GZIP!"],
+                ["arquivo deve ser .CSV ou .CSV.GZIP!"],
             )
 
     @mock.patch("secret.models.send_mail")

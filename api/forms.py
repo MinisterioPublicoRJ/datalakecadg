@@ -1,5 +1,6 @@
 import gzip
 from functools import partial
+from io import BytesIO
 
 from django import forms
 from django.forms.utils import ErrorDict
@@ -16,8 +17,11 @@ class FileUploadForm(forms.Form):
 
     def __init__(self, disable_md5=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.md5_ = md5reader(self.files["file"]) if self.files else ""
         self.disable_md5 = disable_md5
+        self.md5_ = self.prepare_md5(self.files.get("file"))
+
+    def prepare_md5(self, file_):
+        return md5reader(file_) if not self.disable_md5 and file_ else ""
 
     # TODO: Talvez faça sentido criar uma classe sem herdar de forms.Form
     # e chamaar os métods de validação de cada campo.
@@ -121,6 +125,14 @@ class FileUploadForm(forms.Form):
 
         return filename
 
+    def compress(self, file_):
+        out = BytesIO()
+        with gzip.GzipFile(fileobj=out, mode='w') as fobj:
+            fobj.write(file_.read())
+            out.seek(0)
+
+        return out.getvalue()
+
     def clean(self):
         cleaned_data = super().clean()
         valid_data, status = is_data_valid(
@@ -133,5 +145,8 @@ class FileUploadForm(forms.Form):
                 ["arquivo apresentou estrutura de dados inválida"]
             )
             self._errors["detail_schema"] = status
+
+        if self.is_csv:
+            cleaned_data["file"] = self.compress(cleaned_data["file"])
 
         return cleaned_data
