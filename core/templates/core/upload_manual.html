@@ -50,6 +50,12 @@
         {% endif %}
         {% if 'schema' in form.errors %}
             <p>{{ form.errors.schema }}</p>
+
+            <div class="columns">
+                <div class="column">
+					<a id="export-errors" class="button is-info" ref="">Download dos erros</a>
+                </div>
+            </div>
         {% endif %}
 
       {% if auth_error %}
@@ -63,4 +69,20 @@
     {% endif %}
  </div>
 </div>
+<div id="schema-errors" style="display: none;" data-json="{{ form.errors.detail_schema }}"></div>
+	<script>
+		a = document.querySelector('#export-errors');
+		if (a != null){
+			json = document.querySelector('#schema-errors').dataset['json'];
+
+			senderUsername = document.querySelector("#id_nome").value
+			senderMethod = document.querySelector("#id_method").value
+
+			blob = new Blob(["", json]);
+			referer = URL.createObjectURL(blob);
+
+			a.download = `schema-errors_${senderUsername}_${senderMethod}.json`;
+			a.href = referer;
+		}
+	</script>
 {% endblock content %}
