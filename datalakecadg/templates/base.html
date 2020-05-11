@@ -1,8 +1,34 @@
 {% load staticfiles %}
+<!DOCTYPE html>
 <html>
-  <title>Datalake CADG</title>
-  <body>
-     {% block content %}
-     {% endblock %}
-  </body>
+	<head>
+		<meta charset="utf-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<title>MPRJ | API Dados</title>
+		<link rel="stylesheet" href="{% static 'css/bulma.min.css' %}">
+		<link rel="stylesheet" href="{% static 'css/style.css' %}">
+	</head>
+  <body data-gr-c-s-loaded="true">
+	<div class="container">
+		<header class="header has-text-centered">
+            <a href="{% url 'core:home' %}"><img src="{% static 'img/logo_dados.png' %}" /></a>
+			<svg class="Linha_1">
+				<path id="Linha_1" d="M 0 0 L 0 64">
+				</path>
+			</svg>
+            <a href="{% url 'core:home' %}"/><img src="{% static 'img/logo_MP.png' %}" /></a>
+		</header>
+		<section class="box columns">
+			<div class="column">
+				<img src="{% static 'img/ilustracao.png' %}" />
+			</div>
+			<div class="column">
+    {% block content %}
+    {% endblock content %}
+			</div>
+		</section>
+	</div>
+	</body>
+  {% block js_script %}
+  {% endblock js_script %}
 </html>

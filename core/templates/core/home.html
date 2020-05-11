@@ -1,149 +1,128 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8"/>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-		<title>MPRJ | API Dados</title>
-		<link rel="stylesheet" href="{% static 'css/bulma.min.css' %}">
-		<link rel="stylesheet" href="{% static 'css/style.css' %}">
-	</head>
-	<body>
-	<div class="container">
-		<header class="header has-text-centered">
-			<img src="{% static 'img/logo_dados.png' %}" />
-			<svg class="Linha_1">
-				<path id="Linha_1" d="M 0 0 L 0 64">
-				</path>
-			</svg>
-			<img src="{% static 'img/logo_MP.png' %}" />
-		</header>
-		<section class="box columns">
-			<div class="column">
-				<img src="{% static 'img/ilustracao.png' %}" />
-			</div>
-			<div class="column">
-				<article class="text-size">
-					<div id="description">
-						<p>Visando o intercâmbio de dados que propiciará o trabalho de inteligência integrado entre o Ministério Público e o governo do Estado do Rio de Janeiro, o Parquet fluminense está disponibilizando para as secretarias de estado e seus parceiros uma ferramenta para recebimento automatizado de dados.</p>
-						<p>A ferramenta recebe atualização de dados em tempo real através do envio de um POST HTTP para endereços web pré-definidos, um para cada modelo de informações.</p>
-						<p>Para ter acesso ao envio de dados é necessário preencher o formulário abaixo solicitando a criação de uma conta. Após o preenchimento do formulário, nossa equipe criará uma chave secreta de autenticação para cada usuário, e as respectivas chaves serão enviadas para o e-mail cadastrado, acompanhadas de instruções técnicas que detalham como deve ser realizado o envio de arquivos para a atualização de dados em tempo real.</p>
-					</div>
-					<div id="about">
-						<strong>Protocolo/Método:</strong>
-						HTTP - POST
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block content %}
+            <article class="text-size">
+                <div id="description">
+                    <p>Visando o intercâmbio de dados que propiciará o trabalho de inteligência integrado entre o Ministério Público e o governo do Estado do Rio de Janeiro, o Parquet fluminense está disponibilizando para as secretarias de estado e seus parceiros uma ferramenta para recebimento automatizado de dados.</p>
+                    <p>A ferramenta recebe atualização de dados em tempo real através do envio de um POST HTTP para endereços web pré-definidos, um para cada modelo de informações.</p>
+                    <p>Para ter acesso ao envio de dados é necessário preencher o formulário abaixo solicitando a criação de uma conta. Após o preenchimento do formulário, nossa equipe criará uma chave secreta de autenticação para cada usuário, e as respectivas chaves serão enviadas para o e-mail cadastrado, acompanhadas de instruções técnicas que detalham como deve ser realizado o envio de arquivos para a atualização de dados em tempo real.</p>
+                </div>
+                <div id="about">
+                    <strong>Protocolo/Método:</strong>
+                    HTTP - POST
 
-						<br/>
+                    <br/>
 
-						<strong>Enctype:</strong>
-						multipart/form-data
+                    <strong>Enctype:</strong>
+                    multipart/form-data
 
-						<br/>
+                    <br/>
 
-						<strong>URL:</strong>
-                        https://datalakecadg.mprj.mp.br/api/upload/
-                        <br/><br/>
+                    <strong>URL:</strong>
+                    https://datalakecadg.mprj.mp.br/api/upload/
+                    <br/><br/>
 
-						<strong>Campos esperados:</strong>
-						<ul>
-							<li>Cada método tem campos diferentes pré determinados que devem aparecer na primeira linha do arquivo CSV.</li>
-							<li>Consulte o e-mail em que foi enviado a sua chave secreta para saber quais campos esperados para o método que você irá enviar arquivos.</li>
-						</ul>
+                    <strong>Campos esperados:</strong>
+                    <ul>
+                        <li>Cada método tem campos diferentes pré determinados que devem aparecer na primeira linha do arquivo CSV.</li>
+                        <li>Consulte o e-mail em que foi enviado a sua chave secreta para saber quais campos esperados para o método que você irá enviar arquivos.</li>
+                    </ul>
 
-						<br/>
+                    <br/>
 
-						<strong>Nome do Arquivo:</strong>
-						<ul>
-						<li>Formato aceito:[a-z0-9]+).csv.gz ex.: placas_20190110231245.csv.gz</li>
-						<li>Adicione no nome do arquivo a data e hora do envio para evitar colisão</li>
-						<li>Caso sejam enviados dois arquivos com mesmo nome pelo mesmo usuário o primeiro será sobrescrito</li>
-						</ul>
+                    <strong>Nome do Arquivo:</strong>
+                    <ul>
+                    <li>Formato aceito:[a-z0-9]+).csv.gz ex.: placas_20190110231245.csv.gz</li>
+                    <li>Adicione no nome do arquivo a data e hora do envio para evitar colisão</li>
+                    <li>Caso sejam enviados dois arquivos com mesmo nome pelo mesmo usuário o primeiro será sobrescrito</li>
+                    </ul>
 
-						<br/>
+                    <br/>
 
-						<strong>Formato do arquivo esperado: um pacote GZIP contendo um arquivo CSV</strong>
-						<ul>
-							<li>Charset: UTF-8</li>
-							<li>Separator: ;</li>
-							<li>Quote: ""</li>
-							<li>Line terminator: \n</li>
-						</ul>
+                    <strong>Formato do arquivo esperado: um pacote GZIP contendo um arquivo CSV</strong>
+                    <ul>
+                        <li>Charset: UTF-8</li>
+                        <li>Separator: , (vírgula)</li>
+                        <li>Quote: ""</li>
+                        <li>Line terminator: \n</li>
+                    </ul>
 
-						<br/>
+                    <br/>
 
-						<strong>Campos do Header do POST:</strong>
-						<ul>
-						<li>'filename': (string) nome completo do arquivo, ex.: placas_20190110.csv.gz</li>
-						<li>'nome': (string) nome do usuário - 'SEU NOME DE USUÁRIO''</li>
-						<li>'md5': (string) hash MD5 hexadecimal de 32 posições do arquivo enviado, em minúsculas</li>
-						<li>'method':(string) nome do método - 'MÉTODO PARA QUAL QUER ENVIAR OS DADOS'</li>
-						<li>'SECRET':(string) Chave hexadecimal - 'SUA CHAVE SECRETA'</li>
-						<li>'file' (Bytes): Arquivo a ser enviado para o MPRJ</li>
-						</ul>
+                    <strong>Campos do Header do POST:</strong>
+                    <ul>
+                    <li>'filename': (string) nome completo do arquivo, ex.: placas_20190110.csv.gz</li>
+                    <li>'nome': (string) nome do usuário - 'SEU NOME DE USUÁRIO''</li>
+                    <li>'md5': (string) hash MD5 hexadecimal de 32 posições do arquivo enviado, em minúsculas</li>
+                    <li>'method':(string) nome do método - 'MÉTODO PARA QUAL QUER ENVIAR OS DADOS'</li>
+                    <li>'SECRET':(string) Chave hexadecimal - 'SUA CHAVE SECRETA'</li>
+                    <li>'file' (Bytes): Arquivo a ser enviado para o MPRJ</li>
+                    </ul>
 
-						<br/>
+                    <br/>
 
 
-						<strong>Respostas:</strong>
-						<ul>
-							<li>OK: status_code: 201 - Arquivo salvo com sucesso</li>
-							<li>Não OK: status code: 400 - Extensão do arquivo enviado inválida ou cabeçalhos do arquivo csv inválidos</li>
-							<li>Não OK: status code: 403 - SECRET, username e/ou method estão errados</li>
-							<li>Não OK: status code: 415 - md5 enviado não é o mesmo que o calculado em nosso serviço</li>
-						</ul>
-						<br/>
+                    <strong>Respostas:</strong>
+                    <ul>
+                        <li>OK: status_code: 201 - Arquivo salvo com sucesso</li>
+                        <li>Não OK: status code: 400 - Extensão do arquivo enviado inválida ou cabeçalhos do arquivo csv inválidos</li>
+                        <li>Não OK: status code: 403 - SECRET, username e/ou method estão errados</li>
+                        <li>Não OK: status code: 415 - md5 enviado não é o mesmo que o calculado em nosso serviço</li>
+                    </ul>
+                    <br/>
 
-						<strong>Importante</strong>
-						<p>Os arquivos são registrados no Big Data por seus nomes.
-						Normalize o nome do arquivo de acordo com seu lote e índice, para que arquivos
-						anteriores
-						não sejam sobrescritos.
-						Arquivos novos sobrescreverão arquivos homônimos no BDA.</p>
+                    <strong>Importante</strong>
+                    <p>Os arquivos são registrados no Big Data por seus nomes.
+                    Normalize o nome do arquivo de acordo com seu lote e índice, para que arquivos
+                    anteriores
+                    não sejam sobrescritos.
+                    Arquivos novos sobrescreverão arquivos homônimos no BDA.</p>
 
-						<br/>
+                    <br/>
 
-						<strong>Exemplo de envio</strong>
-                        <p>Estão disponibilizados no GitHub dois exemplos de scripts que enviam dados
-                            seguindo os requisitos descritos acima. Você pode encontrá-los no endereço
-                            <a target=_blank href="https://github.com/MinisterioPublicoRJ/scripts-datalakecadg">
-                                https://github.com/MinisterioPublicoRJ/scripts-datalakecadg
-                            </a>.
-                        </p>
-					</div>
-				</article>
-				<div class="buttons">
-					<a href="https://forms.office.com/Pages/ResponsePage.aspx?id=lnjkyX_gzkSGzS73hM2h2woTWJ8BlQlLjuwTDVhZQspUMEJGU0U2RkkzR1I2VjJBTzRVTVo1VVYyVi4u" target="_blank" class="button is-info is-outlined is-uppercase">
-						acessar o formulário - Geral
-					</a>
-					<a href="https://forms.office.com/Pages/ResponsePage.aspx?id=lnjkyX_gzkSGzS73hM2h2woTWJ8BlQlLjuwTDVhZQspUM0QyNzYwOU5HOEJZUEVTSE43OE4xTFNLUS4u" target="_blank" class="button is-info is-outlined is-uppercase">
-						acessar o formulário - SES
-					</a>
-					<button type="button" id="toggleButton" class="button is-info is-outlined is-uppercase">
-						instruções para envio
-					</button>
-				</div>
-			</div>
-		</section>
-	</div>
-	</body>
-	<script>
-		let toggleButton = document.getElementById('toggleButton')
-		let aboutBox = document.getElementById('about')
-		let textBox = document.getElementById('description')
-		let isShowingAbout = false
+                    <strong>Exemplo de envio</strong>
+                    <p>Estão disponibilizados no GitHub dois exemplos de scripts que enviam dados
+                        seguindo os requisitos descritos acima. Você pode encontrá-los no endereço
+                        <a target=_blank href="https://github.com/MinisterioPublicoRJ/scripts-datalakecadg">
+                            https://github.com/MinisterioPublicoRJ/scripts-datalakecadg
+                        </a>.
+                    </p>
+                </div>
+            </article>
+            <div class="buttons">
+                <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=lnjkyX_gzkSGzS73hM2h2woTWJ8BlQlLjuwTDVhZQspUMEJGU0U2RkkzR1I2VjJBTzRVTVo1VVYyVi4u" target="_blank" class="button is-primary is-uppercase is-fullwidth">
+                    formulário - Geral
+                </a>
+                <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=lnjkyX_gzkSGzS73hM2h2woTWJ8BlQlLjuwTDVhZQspUM0QyNzYwOU5HOEJZUEVTSE43OE4xTFNLUS4u" target="_blank" class="button is-primary is-uppercase is-fullwidth">
+                    formulário - SES
+                </a>
+                <button type="button" id="toggleButton" class="button is-info is-outlined is-uppercase is-fullwidth">
+                    instruções para envio
+                </button>
+                <a href="{% url 'core:upload-manual' %}" class="button is-info is-outlined is-uppercase is-fullwidth">
+                    envio manual de dados
+                </a>
+            </div>
+{% endblock content %}
+{% block js_script %}
+<script>
+    let toggleButton = document.getElementById('toggleButton')
+    let aboutBox = document.getElementById('about')
+    let textBox = document.getElementById('description')
+    let isShowingAbout = false
 
-		toggleButton.addEventListener("click", () => {
-			if (!isShowingAbout) {
-				aboutBox.style.display = "block"
-				textBox.style.display = "none"
-				isShowingAbout = true
-				toggleButton.innerHTML = `descrição`
-			} else {
-				aboutBox.style.display = "none"
-				textBox.style.display = "block"
-				isShowingAbout = false
-				toggleButton.innerHTML = `instruções para envio`
-			}
-		})
-	</script>
-</html>
+    toggleButton.addEventListener("click", () => {
+        if (!isShowingAbout) {
+            aboutBox.style.display = "block"
+            textBox.style.display = "none"
+            isShowingAbout = true
+            toggleButton.innerHTML = `descrição`
+        } else {
+            aboutBox.style.display = "none"
+            textBox.style.display = "block"
+            isShowingAbout = false
+            toggleButton.innerHTML = `instruções para envio`
+        }
+    })
+</script>
+{% endblock js_script %}

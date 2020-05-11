@@ -1,25 +1,32 @@
 import csv
 import gzip
-
+import logging
+from io import StringIO
 from os import path
 
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_http_methods
 from functools import wraps
+from goodtables import validate
 from hashlib import md5
 
+from api.clients import hdfsclient
 from secret.models import Secret
 
 
-def securedecorator(func):
+logger = logging.getLogger(__name__)
+FILE_ENCODING = "utf-8-sig"
 
+
+def securedecorator(func):
     @wraps(func)
     @require_http_methods(["POST"])
     def wrapper(*args, **kwargs):
         request = args[0]
 
-        username = request.POST.get('nome', -1)
-        secret = request.POST.get('SECRET', -1)
+        username = request.POST.get("nome", -1)
+        secret = request.POST.get("SECRET", -1)
         if Secret.objects.filter(username=username, secret_key=secret):
             return func(*args, **kwargs)
 
@@ -37,43 +44,61 @@ def md5reader(uploadedfile):
     return hash_md5.hexdigest()
 
 
-def is_header_valid(username, method, file_):
-    dest = Secret.objects.filter(
-        username=username,
-        methods__method=method
-    )
-    if dest.exists():
-        expected_headers = dest.first().methods.first().mandatory_headers
-        # If expected_headers is empty do not need to make validation
-        if expected_headers == '':
-            return True, {}
+def read_csv_sample(file_, sample_size=100):
+    if file_.name.endswith(".gz"):
+        fobj = gzip.open(file_, mode="rt", newline="", encoding=FILE_ENCODING)
+    else:
+        fobj = StringIO(file_.read().decode(FILE_ENCODING))
+        fobj.seek(0)
 
-        with gzip.open(file_, 'rt', newline='', encoding='utf-8-sig') as fobj:
-            dialect = csv.Sniffer().sniff(fobj.readline())
-            fobj.seek(0)
-            reader = csv.reader(fobj, dialect)
-            header = next(reader)
-            file_.seek(0)
-            if header == expected_headers.split(','):
-                return True, {}
-            else:
-                return (False,
-                        'File must contain the following headers: {0}.'
-                        ' Received: {1}'.format(
-                            expected_headers,
-                            ','.join(header)
-                        ))
+    # force delimiter to be ','
+    reader = csv.reader(fobj, delimiter=",")
+    samples_count = 0
+    sample_data = []
+    for row in reader:
+        sample_data.append(row)
+        samples_count += 1
+        if samples_count == sample_size:
+            break
+
+    fobj.seek(0)
+
+    return sample_data
+
+
+def is_data_valid(username, method, file_):
+    dest = Secret.objects.filter(username=username, methods__method=method)
+    if dest.exists():
+        expected_schema = dest.first().methods.get(method=method).schema
+
+        sample_data = read_csv_sample(
+            file_, sample_size=settings.CSV_SAMPLE_SIZE,
+        )
+        validation = validate(sample_data, schema=expected_schema)
+        if validation["valid"]:
+            return True, {}
+        else:
+            return False, validation["tables"][0]["errors"]
+
+    logger.info(
+        "Erro ao encontrar método para usuário {0} - {1}".format(
+            username, method
+        )
+    )
+    return False, "Destino para upload não existe"
 
 
 def get_destination(username, method):
     user_secret = Secret.objects.filter(
-        username=username,
-        methods__method=method
+        username=username, methods__method=method
     )
     if user_secret.exists():
         return path.join(
-            user_secret.get().methods.get(method=method).uri,
-            username
+            user_secret.get().methods.get(method=method).uri, username
         )
 
     raise PermissionDenied()
+
+
+def upload_to_hdfs(file, filename, destination):
+    hdfsclient.write(path.join(destination, filename), file, overwrite=True)
