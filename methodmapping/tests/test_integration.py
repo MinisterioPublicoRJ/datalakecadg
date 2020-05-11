@@ -70,5 +70,6 @@ class DatabaseIntegrationTest(TestCase):
                 }
             )
 
+        print(response.json())
         self.assertEqual(response.status_code, 201)
         hdfsclient.status(os.path.join(hdfs_uri, username, filename))

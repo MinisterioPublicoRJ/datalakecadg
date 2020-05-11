@@ -31,8 +31,8 @@ p {
 
 .text-size {
     color: rgba(112,112,112,1);
-    height: 90%;
-    margin-bottom: 2em;
+    height: 70%;
+    margin-bottom: 1em;
     overflow-y: auto;
 }
 
@@ -75,4 +75,18 @@ p {
     .box {
         height: 37.5em;
     }
+}
+
+label {
+    font-weight: bold;
+}
+
+.errors {
+    font-weight: bold;
+    color: red;
+}
+
+.success {
+    font-weight: bold;
+    color: green;
 }
