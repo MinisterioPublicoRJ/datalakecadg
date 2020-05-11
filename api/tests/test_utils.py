@@ -9,8 +9,10 @@ from model_mommy.mommy import make
 from api.utils import (
     securedecorator,
     md5reader,
-    is_header_valid,
-    get_destination)
+    is_data_valid,
+    get_destination,
+    read_csv_sample,
+)
 
 
 @securedecorator
@@ -20,16 +22,15 @@ def postmethod(request):
 
 class TestSecureDecorator(TestCase):
     def test_secure_empty_key(self):
-        fakerequest = RequestFactory().post('')
+        fakerequest = RequestFactory().post("")
 
         with self.assertRaises(PermissionDenied):
             postmethod(request=fakerequest)
 
     def test_empty_username(self):
-        secret = make('secret.Secret', username='anyname')
+        secret = make("secret.Secret", username="anyname")
         fakerequest = RequestFactory().post(
-            '',
-            data={'SECRET': secret.secret_key}
+            "", data={"SECRET": secret.secret_key}
         )
 
         with self.assertRaises(PermissionDenied):
@@ -37,15 +38,10 @@ class TestSecureDecorator(TestCase):
 
     def test_secure_wrong_key(self):
         make(
-            'secret.Secret',
-            username='anyname',
+            "secret.Secret", username="anyname",
         )
         fakerequest = RequestFactory().post(
-            '',
-            data={
-                'nome': 'anyname',
-                'SECRET': 'wrongkey'
-            }
+            "", data={"nome": "anyname", "SECRET": "wrongkey"}
         )
 
         with self.assertRaises(PermissionDenied):
@@ -53,28 +49,19 @@ class TestSecureDecorator(TestCase):
 
     def test_secure_user_doesnt_match_secret(self):
         make(
-            'secret.Secret',
-            username='anyname',
+            "secret.Secret", username="anyname",
         )
         fakerequest = RequestFactory().post(
-            '',
-            data={
-                'nome': 'othername',
-                'SECRET': 'aaaabbbcc'
-            }
+            "", data={"nome": "othername", "SECRET": "aaaabbbcc"}
         )
 
         with self.assertRaises(PermissionDenied):
             postmethod(request=fakerequest)
 
     def test_secure(self):
-        secret = make(
-            'secret.Secret',
-            username='anyname',
-        )
+        secret = make("secret.Secret", username="anyname",)
         fakerequest = RequestFactory().post(
-            '',
-            data={'nome': secret.username, 'SECRET': secret.secret_key}
+            "", data={"nome": secret.username, "SECRET": secret.secret_key}
         )
 
         postmethod(request=fakerequest)
@@ -82,142 +69,167 @@ class TestSecureDecorator(TestCase):
 
 class TestMd5Reader(TestCase):
     def test_hexdigest(self):
-        contents = b'filecontents'
-        uploadedfile = SimpleUploadedFile(
-            'file',
-            contents
-        )
+        contents = b"filecontents"
+        uploadedfile = SimpleUploadedFile("file", contents)
 
-        self.assertEquals(
-            md5reader(uploadedfile),
-            md5(contents).hexdigest()
-        )
+        self.assertEquals(md5reader(uploadedfile), md5(contents).hexdigest())
 
         self.assertEqual(uploadedfile.file.tell(), 0)
 
     def test_wronghexdigest(self):
-        uploadedfile = SimpleUploadedFile(
-            'file',
-            b'filecontents'
-        )
+        uploadedfile = SimpleUploadedFile("file", b"filecontents")
 
         self.assertNotEquals(
-            md5reader(uploadedfile),
-            md5(b'lerolero').hexdigest()
+            md5reader(uploadedfile), md5(b"lerolero").hexdigest()
         )
 
 
 class TestValidHeader(TestCase):
-    @mock.patch('secret.models.login')
-    def test_validate_file_header(self, _mail_login):
-        gzipped_file = open('api/tests/csv_example.csv.gz', 'rb')
-        secret = make('secret.Secret', username='anyname')
+    @mock.patch("secret.models.login")
+    def test_invalid_csd_NOT_comma_separated(self, _mail_login):
+        gzipped_file = open("api/tests/csv_example_semicolon.csv.gz", "rb")
+        secret = make("secret.Secret", username="anyname")
         mmap = make(
-            'methodmapping.MethodMapping',
-            method='cpf',
-            uri='/path/to/storage/cpf',
-            mandatory_headers='field1,field2,field3'
+            "methodmapping.MethodMapping",
+            method="cpf",
+            uri="/path/to/storage/cpf",
+            schema={
+                "fields": [
+                    {"name": "field1"},
+                    {"name": "field2"},
+                    {"name": "field3"},
+                ]
+            },
         )
         secret.methods.add(mmap)
 
-        valid, status = is_header_valid(secret.username, 'cpf', gzipped_file)
-
-        self.assertTrue(valid)
-
-    @mock.patch('secret.models.login')
-    def test_not_validate_header_if_mandatory_field_is_empty(self,
-                                                             _mail_login):
-        gzipped_file = open('api/tests/csv_example.csv.gz', 'rb')
-        secret = make('secret.Secret', username='anyname')
-        mmap = make(
-            'methodmapping.MethodMapping',
-            method='cpf',
-            uri='/path/to/storage/cpf',
-            mandatory_headers=''
-        )
-        secret.methods.add(mmap)
-
-        valid, status = is_header_valid(secret.username, 'cpf', gzipped_file)
-
-        self.assertTrue(valid)
-
-    @mock.patch('secret.models.login')
-    def test_validate_file_header_with_semicolon(self, _mail_login):
-        gzipped_file = open('api/tests/csv_example_semicolon.csv.gz', 'rb')
-        secret = make('secret.Secret', username='anyname')
-        mmap = make(
-            'methodmapping.MethodMapping',
-            method='cpf',
-            uri='/path/to/storage/cpf',
-            mandatory_headers='field1,field2,field3'
-        )
-        secret.methods.add(mmap)
-
-        valid, status = is_header_valid(secret.username, 'cpf', gzipped_file)
-
-        self.assertTrue(valid)
-
-    @mock.patch('secret.models.login')
-    def test_validate_header_error_log(self, _mail_login):
-        gzipped_file = open('api/tests/csv_example_semicolon.csv.gz', 'rb')
-        secret = make('secret.Secret', username='anyname')
-        mmap = make(
-            'methodmapping.MethodMapping',
-            method='cpf',
-            uri='/path/to/storage/cpf',
-            mandatory_headers='other_field1,other_field2,other_field3'
-        )
-        secret.methods.add(mmap)
-
-        expected_status = 'File must contain the following headers: '\
-            'other_field1,other_field2,other_field3. Received: field1,field2,'\
-            'field3'
-        valid, status = is_header_valid(secret.username, 'cpf', gzipped_file)
+        valid, status = is_data_valid(secret.username, "cpf", gzipped_file)
 
         self.assertFalse(valid)
-        self.assertEqual(status, expected_status)
+        self.assertTrue(len(status))
+
+    @mock.patch("secret.models.login")
+    def test_not_validate_header_if_schema_field_is_null(self, _mail_login):
+        gzipped_file = open("api/tests/csv_example.csv.gz", "rb")
+        secret = make("secret.Secret", username="anyname")
+        mmap = make(
+            "methodmapping.MethodMapping",
+            method="cpf",
+            uri="/path/to/storage/cpf",
+            schema=None,
+        )
+        secret.methods.add(mmap)
+
+        valid, status = is_data_valid(secret.username, "cpf", gzipped_file)
+
+        self.assertTrue(valid)
+
+    @mock.patch("secret.models.login")
+    def test_validate_file_header_with_semicolon(self, _mail_login):
+        gzipped_file = open("api/tests/csv_example.csv.gz", "rb")
+        secret = make("secret.Secret", username="anyname")
+        mmap = make(
+            "methodmapping.MethodMapping",
+            method="cpf",
+            uri="/path/to/storage/cpf",
+            schema={
+                "fields": [
+                    {"name": "field1"},
+                    {"name": "field2"},
+                    {"name": "field3"},
+                ]
+            },
+        )
+        secret.methods.add(mmap)
+
+        valid, status = is_data_valid(secret.username, "cpf", gzipped_file)
+
+        self.assertTrue(valid)
+        self.assertFalse(len(status))
+
+    @mock.patch("secret.models.login")
+    def test_invlid_destination(self, _mail_login):
+        gzipped_file = open("api/tests/csv_example.csv.gz", "rb")
+        secret = make("secret.Secret", username="anyname")
+        mmap = make(
+            "methodmapping.MethodMapping",
+            method="cpf",
+            uri="/path/to/storage/cpf",
+            schema={
+                "fields": [
+                    {"name": "field1"},
+                    {"name": "field2"},
+                    {"name": "field3"},
+                ]
+            },
+        )
+        secret.methods.add(mmap)
+
+        valid, status = is_data_valid(
+            "wrong-user", "wront-method", gzipped_file
+        )
+
+        self.assertFalse(valid)
+        self.assertEqual(status, "Destino para upload não existe")
 
 
 class TestMethodDestination(TestCase):
-    @mock.patch('secret.models.login')
+    @mock.patch("secret.models.login")
     def test_get_correct_destination(self, _mail_login):
-        username = 'anyname'
-        methodname = 'cpf'
+        username = "anyname"
+        methodname = "cpf"
 
-        secret = make('secret.Secret', username=username)
+        secret = make("secret.Secret", username=username)
         mmap = make(
-            'methodmapping.MethodMapping',
+            "methodmapping.MethodMapping",
             method=methodname,
-            uri='/path/to/storage/' + methodname,
-            mandatory_headers='field1,field2,field3'
+            uri="/path/to/storage/" + methodname,
+            schema={
+                "fields": [
+                    {"name": "field1"},
+                    {"name": "field2"},
+                    {"name": "field3"},
+                ]
+            },
         )
         secret.methods.add(mmap)
 
         dest = get_destination(username, methodname)
 
         self.assertEqual(
-            dest,
-            '/path/to/storage/{0}/{1}'.format(methodname, username)
+            dest, "/path/to/storage/{0}/{1}".format(methodname, username)
         )
 
-    @mock.patch('secret.models.login')
+    @mock.patch("secret.models.login")
     def test_get_correct_destination_with_more_methods(self, _mail_login):
-        username = 'anyname'
-        methodname_1 = 'cpf'
-        methodname_2 = 'cnpj'
+        username = "anyname"
+        methodname_1 = "cpf"
+        methodname_2 = "cnpj"
 
-        secret = make('secret.Secret', username=username)
+        secret = make("secret.Secret", username=username)
         mmap_1 = make(
-            'methodmapping.MethodMapping',
+            "methodmapping.MethodMapping",
             method=methodname_1,
-            uri='/path/to/storage/' + methodname_1,
-            mandatory_headers='field1,field2,field3'
+            uri="/path/to/storage/" + methodname_1,
+            schema={
+                "fields": [
+                    {"name": "field1"},
+                    {"name": "field2"},
+                    {"name": "field3"},
+                ]
+            },
         )
         mmap_2 = make(
-            'methodmapping.MethodMapping',
+            "methodmapping.MethodMapping",
             method=methodname_2,
-            uri='/path/to/storage/' + methodname_2,
-            mandatory_headers='field1,field2,field3'
+            uri="/path/to/storage/" + methodname_2,
+            schema={
+                "fields": [
+                    {"name": "field1"},
+                    {"name": "field2"},
+                    {"name": "field3"},
+                ]
+            },
         )
         secret.methods.add(mmap_1)
         secret.methods.add(mmap_2)
@@ -225,6 +237,23 @@ class TestMethodDestination(TestCase):
         dest = get_destination(username, methodname_2)
 
         self.assertEqual(
-            dest,
-            '/path/to/storage/{0}/{1}'.format(methodname_2, username)
+            dest, "/path/to/storage/{0}/{1}".format(methodname_2, username)
         )
+
+
+class ReadCSVUtilsTest(TestCase):
+    def test_read_gz_sample(self):
+        with open("api/tests/csv_example.csv.gz", "rb") as gz_csv:
+            sample_data = read_csv_sample(gz_csv)
+
+        expected = [["field1", "field2", "field3"], ["1", "2", "3"]]
+
+        self.assertEqual(sample_data, expected)
+
+    def test_read_csv_sample(self):
+        with open("api/tests/csv_example.csv", "rb") as gz_csv:
+            sample_data = read_csv_sample(gz_csv)
+
+        expected = [["field1", "field2", "field3"], ["1", "2", "3"]]
+
+        self.assertEqual(sample_data, expected)

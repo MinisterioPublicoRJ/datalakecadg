@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block content %}
+<form method="POST" enctype="multipart/form-data" action="{% url 'core:upload-manual' %}">
+   {% csrf_token %}
+    <div class="columns">
+        <div class="column is-one-third">
+            <label for="id_secret">Chave Secreta:</label>
+        </div>
+        <div class="column">
+            <input id="id_secret" type="text" name="SECRET" required>
+        </div>
+    </div>
+    <div class="columns">
+        <div class="column is-one-third">
+            <label for="id_nome">Nome de usuário:</label>
+        </div>
+        <div class="column">
+            {{ form.nome }}
+        </div>
+    </div>
+    <div class="columns">
+        <div class="column is-one-third">
+            <label for="id_method">Nome do método:</label>
+        </div>
+        <div class="column">
+            {{ form.method }}
+        </div>
+    </div>
+    <div class="columns">
+        <div class="column">
+            {{ form.file }}
+        </div>
+    </div>
+    <div class="columns">
+        <div class="buttons column">
+            <input type="submit" value="Enviar" class="button is-info is-outlined is-uppercase">
+        </div>
+    </div>
+  </form>
+
+<div class="section">
+  <div class="content">
+        {% if form.errors %}
+          <p class="errors">Erro de envio</p>
+          {% for field in form %}
+              {% for error in field.errors %}
+                 {{ field.label }} - {{ error }}
+              {% endfor %}
+           {% endfor %}
+        {% endif %}
+        {% if 'schema' in form.errors %}
+            <p>{{ form.errors.schema }}</p>
+
+            <div class="columns">
+                <div class="column">
+					<a id="export-errors" class="button is-info" ref="">Download dos erros</a>
+                </div>
+            </div>
+        {% endif %}
+
+      {% if auth_error %}
+        <p class="errors">Erro de credenciais</p>
+        {{ auth_error }}
+    {% endif %}
+
+    {% if success %}
+        <p class="success">Tudo certo!</p>
+            <p>O arquivo foi enviado com sucesso</p>
+    {% endif %}
+ </div>
+</div>
+<div id="schema-errors" style="display: none;" data-json="{{ form.errors.detail_schema }}"></div>
+	<script>
+		a = document.querySelector('#export-errors');
+		if (a != null){
+			json = document.querySelector('#schema-errors').dataset['json'];
+
+			senderUsername = document.querySelector("#id_nome").value
+			senderMethod = document.querySelector("#id_method").value
+
+			blob = new Blob(["", json]);
+			referer = URL.createObjectURL(blob);
+
+			a.download = `schema-errors_${senderUsername}_${senderMethod}.json`;
+			a.href = referer;
+		}
+	</script>
+{% endblock content %}
