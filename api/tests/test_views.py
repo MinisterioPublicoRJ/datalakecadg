@@ -107,7 +107,7 @@ class TestUpload(TestCase):
             self.assertEqual(response.status_code, 415)
             self.assertEqual(
                 response.json()["error"]["filename"],
-                ["arquivo deve ser .CSV ou .CSV.GZIP!"],
+                ["arquivo deve ser .csv.gz!"],
             )
 
     @mock.patch("secret.models.send_mail")

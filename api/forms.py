@@ -15,10 +15,11 @@ class FileUploadForm(forms.Form):
     md5 = forms.CharField(max_length=32, label="Valor MD5", required=False)
     file = forms.FileField(label="Arquivo")
 
-    def __init__(self, disable_md5=False, *args, **kwargs):
+    def __init__(self, disable_md5=False, good_exts=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.disable_md5 = disable_md5
         self.md5_ = self.prepare_md5(self.files.get("file"))
+        self.good_exts = good_exts or (".csv.gz",)
 
     def prepare_md5(self, file_):
         return md5reader(file_) if not self.disable_md5 and file_ else ""
@@ -108,11 +109,12 @@ class FileUploadForm(forms.Form):
         given_filename = self.cleaned_data.get("filename")
         original_filename = self.files["file"].name
         filename = given_filename or original_filename
-        good_exts = (".gz", ".csv")
-        if not filename.endswith(good_exts) or not original_filename.endswith(
-            good_exts
-        ):
-            raise forms.ValidationError("arquivo deve ser .CSV ou .CSV.GZIP!")
+        if not filename.endswith(
+            self.good_exts
+        ) or not original_filename.endswith(self.good_exts):
+            raise forms.ValidationError(
+                f"arquivo deve ser {', '.join(self.good_exts)}!"
+            )
 
         return filename
 

@@ -1,11 +1,10 @@
 import logging
 
-
-from django.shortcuts import render
-
 from api.forms import FileUploadForm
 from api.utils import get_destination, upload_to_hdfs
+from django.shortcuts import render
 from secret.models import Secret
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,11 +20,12 @@ def upload_manual(request):
         # TODO: transformar validação abaixo em função
         username = request.POST.get("nome", -1)
         secret = request.POST.get("SECRET", -1)
-        if Secret.objects.filter(
-            username=username, secret_key=secret
-        ).exists():
+        if Secret.objects.filter(username=username, secret_key=secret).exists():
             form = FileUploadForm(
-                data=request.POST, files=request.FILES, disable_md5=True
+                data=request.POST,
+                files=request.FILES,
+                disable_md5=True,
+                good_exts=(".csv", ".csv.gz", ".xlsx"),
             )
             if form.is_valid():
                 destination = get_destination(
@@ -44,9 +44,7 @@ def upload_manual(request):
                     )
                 )
                 return render(
-                    request,
-                    template_name,
-                    {"form": form, "success": True}
+                    request, template_name, {"form": form, "success": True}
                 )
             else:
                 return render(request, template_name, {"form": form})
