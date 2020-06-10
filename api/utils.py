@@ -55,7 +55,7 @@ def read_csv_sample(file_, sample_size=100):
         fobj = StringIO(file_.read().decode(FILE_ENCODING))
         fobj.seek(0)
 
-    # delimiters must be either , or ;
+    # delimiters must be ,
     dialect = csv.Sniffer().sniff(fobj.readline())
     if dialect.delimiter not in (",",):
         raise InvalidDelimiterException(
