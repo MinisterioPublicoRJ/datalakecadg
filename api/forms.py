@@ -1,8 +1,11 @@
+import csv
 import gzip
-from io import BytesIO
+from io import BytesIO, StringIO
 
+import xlrd
 from api.utils import is_data_valid, md5reader
 from django import forms
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.forms.utils import ErrorDict
 
 
@@ -81,6 +84,10 @@ class FileUploadForm(forms.Form):
         return self.files["file"].name.endswith(".csv")
 
     @property
+    def is_xlsx(self):
+        return self.files["file"].name.endswith(".xlsx")
+
+    @property
     def base_return(self):
         if self.is_bound:
             return {"md5": self.md5_, "error": self._errors}
@@ -119,6 +126,7 @@ class FileUploadForm(forms.Form):
         return filename
 
     def compress(self, file_):
+        file_.seek(0)
         out = BytesIO()
         with gzip.GzipFile(fileobj=out, mode="w") as fobj:
             fobj.write(file_.read())
@@ -126,7 +134,31 @@ class FileUploadForm(forms.Form):
 
         return out.getvalue()
 
+    def convert_to_csv(self, file_):
+        wb = xlrd.open_workbook(file_contents=file_.read())
+        sh = wb.sheet_by_index(0)
+        output = StringIO()
+        writer = csv.writer(output, quoting=csv.QUOTE_NONNUMERIC)
+        for rownum in range(sh.nrows):
+            writer.writerow(sh.row_values(rownum))
+
+        size = output.tell()
+        output.seek(0)
+        in_memory = InMemoryUploadedFile(
+            output,
+            name=file_.name,
+            content_type="text/csv",
+            size=size,
+            field_name=file_.field_name,
+            charset=file_.charset,
+        )
+        in_memory.seek(0)
+        return in_memory
+
     def clean(self):
+        if self.is_xlsx:
+            self.files["file"] = self.convert_to_csv(self.files["file"])
+
         cleaned_data = super().clean()
         valid_data, status = is_data_valid(
             cleaned_data["nome"], cleaned_data["method"], self.files["file"]
@@ -137,7 +169,10 @@ class FileUploadForm(forms.Form):
             )
             self._errors["detail_schema"] = status
 
-        if self.is_csv:
+        if self.is_csv or self.is_xlsx:
+            cleaned_data["filename"] = cleaned_data["filename"].replace(
+                ".xlsx", ".csv"
+            )
             cleaned_data["file"] = self.compress(cleaned_data["file"])
             cleaned_data["filename"] = cleaned_data["filename"] + ".gz"
 

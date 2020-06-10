@@ -32,7 +32,7 @@ def upload_manual(request):
                     form.cleaned_data["nome"], form.cleaned_data["method"]
                 )
                 upload_to_hdfs(
-                    form.files["file"],
+                    form.cleaned_data["file"],
                     form.cleaned_data["filename"],
                     destination,
                 )

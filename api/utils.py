@@ -6,7 +6,6 @@ from hashlib import md5
 from io import StringIO
 from os import path
 
-import rows
 from api.clients import hdfsclient
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -48,18 +47,17 @@ def md5reader(uploadedfile):
 
 
 def read_csv_sample(file_, sample_size=100):
-    if file_.name.endswith(".gz"):
+    if file_.name.endswith(".csv.gz"):
         fobj = gzip.open(file_, mode="rt", newline="", encoding=FILE_ENCODING)
     elif file_.name.endswith(".xlsx"):
-        table = rows.import_from_xlsx(file_)
-        fobj = StringIO(rows.export_to_csv(table).decode(FILE_ENCODING))
+        fobj = file_
     else:
         fobj = StringIO(file_.read().decode(FILE_ENCODING))
         fobj.seek(0)
 
     # delimiters must be either , or ;
-    dialect = csv.Sniffer().sniff(fobj.read(1024))
-    if dialect.delimiter not in (";", ","):
+    dialect = csv.Sniffer().sniff(fobj.readline())
+    if dialect.delimiter not in (",",):
         raise InvalidDelimiterException(
             "Arquivo contém delimitador inválido: '%s'" % dialect.delimiter
         )
