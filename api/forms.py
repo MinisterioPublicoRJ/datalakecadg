@@ -3,7 +3,7 @@ import gzip
 from io import BytesIO, StringIO
 
 import xlrd
-from api.utils import is_data_valid, md5reader
+from api.utils import FILE_ENCODING, is_data_valid, md5reader
 from django import forms
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.forms.utils import ErrorDict
@@ -127,18 +127,18 @@ class FileUploadForm(forms.Form):
 
     def compress(self, file_):
         file_.seek(0)
-        out = BytesIO()
-        with gzip.GzipFile(fileobj=out, mode="w") as fobj:
-            fobj.write(file_.read())
-            out.seek(0)
+        if isinstance(file_.file, StringIO):
+            c_file = BytesIO(file_.read().encode(FILE_ENCODING))
+        else:
+            c_file = file_.file
 
-        return out.getvalue()
+        return gzip.compress(c_file.getvalue())
 
     def convert_to_csv(self, file_):
         wb = xlrd.open_workbook(file_contents=file_.read())
         sh = wb.sheet_by_index(0)
         output = StringIO()
-        writer = csv.writer(output, quoting=csv.QUOTE_NONNUMERIC)
+        writer = csv.writer(output)
         for rownum in range(sh.nrows):
             writer.writerow(sh.row_values(rownum))
 
@@ -156,12 +156,12 @@ class FileUploadForm(forms.Form):
         return in_memory
 
     def clean(self):
-        if self.is_xlsx:
-            self.files["file"] = self.convert_to_csv(self.files["file"])
-
         cleaned_data = super().clean()
+        if self.is_xlsx:
+            cleaned_data["file"] = self.convert_to_csv(cleaned_data["file"])
+
         valid_data, status = is_data_valid(
-            cleaned_data["nome"], cleaned_data["method"], self.files["file"]
+            cleaned_data["nome"], cleaned_data["method"], cleaned_data["file"]
         )
         if not valid_data:
             self._errors["schema"] = self.error_class(
