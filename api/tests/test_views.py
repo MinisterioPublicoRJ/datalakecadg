@@ -3,8 +3,8 @@ from io import BytesIO
 from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.urls import reverse
 from django.test import TestCase
+from django.urls import reverse
 from model_mommy.mommy import make
 
 
@@ -238,6 +238,45 @@ class TestUpload(TestCase):
             method="cpf",
             uri="/path/to/storage/cpf",
             schema=None,
+        )
+        secret.methods.add(mmap)
+        with open("api/tests/csv_example.csv.gz", "rb") as file_:
+            contents_md5 = md5(file_.read()).hexdigest()
+            file_.seek(0)
+            response = self.client.post(
+                reverse("api-upload"),
+                {
+                    "SECRET": secret.secret_key,
+                    "nome": secret.username,
+                    "md5": contents_md5,
+                    "method": "cpf",
+                    "file": file_,
+                    "filename": "csv_example.csv.gz",
+                },
+            )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()["error"], {})
+
+    @mock.patch("secret.models.send_mail")
+    @mock.patch("api.views.upload_to_hdfs")
+    @mock.patch("secret.models.login")
+    def test_validated_schema_success_with_semicolon_csv(
+        self, _email_login, upload_to_hdfs, mm_added,
+    ):
+        # Return different header
+        secret = make("secret.Secret", username="anyname")
+        mmap = make(
+            "methodmapping.MethodMapping",
+            method="cpf",
+            uri="/path/to/storage/cpf",
+            schema={
+                "fields": [
+                    {"name": "field1"},
+                    {"name": "field2"},
+                    {"name": "field3"},
+                ]
+            },
         )
         secret.methods.add(mmap)
         with open("api/tests/csv_example_semicolon.csv.gz", "rb") as file_:

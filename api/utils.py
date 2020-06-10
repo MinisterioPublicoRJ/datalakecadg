@@ -1,22 +1,24 @@
 import csv
 import gzip
 import logging
+from functools import wraps
+from hashlib import md5
 from io import StringIO
 from os import path
 
+from api.clients import hdfsclient
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_http_methods
-from functools import wraps
 from goodtables import validate
-from hashlib import md5
-
-from api.clients import hdfsclient
 from secret.models import Secret
-
 
 logger = logging.getLogger(__name__)
 FILE_ENCODING = "utf-8-sig"
+
+
+class InvalidDelimiterException(Exception):
+    pass
 
 
 def securedecorator(func):
@@ -51,8 +53,15 @@ def read_csv_sample(file_, sample_size=100):
         fobj = StringIO(file_.read().decode(FILE_ENCODING))
         fobj.seek(0)
 
-    # force delimiter to be ','
-    reader = csv.reader(fobj, delimiter=",")
+    # delimiters must be either , or ;
+    dialect = csv.Sniffer().sniff(fobj.read(1024))
+    if dialect.delimiter not in (";", ","):
+        raise InvalidDelimiterException(
+            "Arquivo contém delimitador inválido: '%s'" % dialect.delimiter
+        )
+
+    fobj.seek(0)
+    reader = csv.reader(fobj, dialect)
     samples_count = 0
     sample_data = []
     for row in reader:
@@ -71,9 +80,14 @@ def is_data_valid(username, method, file_):
     if dest.exists():
         expected_schema = dest.first().methods.get(method=method).schema
 
-        sample_data = read_csv_sample(
-            file_, sample_size=settings.CSV_SAMPLE_SIZE,
-        )
+        try:
+            sample_data = read_csv_sample(
+                file_, sample_size=settings.CSV_SAMPLE_SIZE,
+            )
+        except InvalidDelimiterException as error:
+            logger.info("{0} | {1} - {2}".format(str(error), username, method))
+            return False, str(error)
+
         validation = validate(sample_data, schema=expected_schema)
         if validation["valid"]:
             return True, {}
