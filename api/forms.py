@@ -120,7 +120,7 @@ class FileUploadForm(forms.Form):
             self.good_exts
         ) or not original_filename.endswith(self.good_exts):
             raise forms.ValidationError(
-                f"arquivo deve ser {', '.join(self.good_exts)}!"
+                "arquivo deve ser {0}!".format(", ".join(self.good_exts))
             )
 
         return filename
