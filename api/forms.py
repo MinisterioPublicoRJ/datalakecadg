@@ -1,11 +1,12 @@
+import csv
 import gzip
-from functools import partial
-from io import BytesIO
+from io import BytesIO, StringIO
 
-from django import forms
-from django.forms.utils import ErrorDict
-
+import xlrd
 from api.utils import FILE_ENCODING, is_data_valid, md5reader
+from django import forms
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.forms.utils import ErrorDict
 
 
 class FileUploadForm(forms.Form):
@@ -17,10 +18,11 @@ class FileUploadForm(forms.Form):
     md5 = forms.CharField(max_length=32, label="Valor MD5", required=False)
     file = forms.FileField(label="Arquivo")
 
-    def __init__(self, disable_md5=False, *args, **kwargs):
+    def __init__(self, disable_md5=False, good_exts=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.disable_md5 = disable_md5
         self.md5_ = self.prepare_md5(self.files.get("file"))
+        self.good_exts = good_exts or (".csv.gz",)
 
     def prepare_md5(self, file_):
         return md5reader(file_) if not self.disable_md5 and file_ else ""
@@ -82,15 +84,8 @@ class FileUploadForm(forms.Form):
         return self.files["file"].name.endswith(".csv")
 
     @property
-    def opener(self):
-        if self.is_csv:
-            opener = partial(open, mode="r", encoding=FILE_ENCODING)
-        else:
-            opener = partial(
-                gzip.open, mode="rt", newline="", encoding=FILE_ENCODING
-            )
-
-        return opener
+    def is_xlsx(self):
+        return self.files["file"].name.endswith(".xlsx")
 
     @property
     def base_return(self):
@@ -121,26 +116,52 @@ class FileUploadForm(forms.Form):
         given_filename = self.cleaned_data.get("filename")
         original_filename = self.files["file"].name
         filename = given_filename or original_filename
-        good_exts = (".gz", ".csv")
-        if not filename.endswith(good_exts) or not original_filename.endswith(
-            good_exts
-        ):
-            raise forms.ValidationError("arquivo deve ser .CSV ou .CSV.GZIP!")
+        if not filename.endswith(
+            self.good_exts
+        ) or not original_filename.endswith(self.good_exts):
+            raise forms.ValidationError(
+                f"arquivo deve ser {', '.join(self.good_exts)}!"
+            )
 
         return filename
 
     def compress(self, file_):
-        out = BytesIO()
-        with gzip.GzipFile(fileobj=out, mode="w") as fobj:
-            fobj.write(file_.read())
-            out.seek(0)
+        file_.seek(0)
+        if isinstance(file_.file, StringIO):
+            c_file = BytesIO(file_.read().encode(FILE_ENCODING))
+        else:
+            c_file = file_.file
 
-        return out.getvalue()
+        return gzip.compress(c_file.getvalue())
+
+    def convert_to_csv(self, file_):
+        wb = xlrd.open_workbook(file_contents=file_.read())
+        sh = wb.sheet_by_index(0)
+        output = StringIO()
+        writer = csv.writer(output)
+        for rownum in range(sh.nrows):
+            writer.writerow(sh.row_values(rownum))
+
+        size = output.tell()
+        output.seek(0)
+        in_memory = InMemoryUploadedFile(
+            output,
+            name=file_.name,
+            content_type="text/csv",
+            size=size,
+            field_name=file_.field_name,
+            charset=file_.charset,
+        )
+        in_memory.seek(0)
+        return in_memory
 
     def clean(self):
         cleaned_data = super().clean()
+        if self.is_xlsx:
+            cleaned_data["file"] = self.convert_to_csv(cleaned_data["file"])
+
         valid_data, status = is_data_valid(
-            cleaned_data["nome"], cleaned_data["method"], self.files["file"]
+            cleaned_data["nome"], cleaned_data["method"], cleaned_data["file"]
         )
         if not valid_data:
             self._errors["schema"] = self.error_class(
@@ -148,7 +169,10 @@ class FileUploadForm(forms.Form):
             )
             self._errors["detail_schema"] = status
 
-        if self.is_csv:
+        if self.is_csv or self.is_xlsx:
+            cleaned_data["filename"] = cleaned_data["filename"].replace(
+                ".xlsx", ".csv"
+            )
             cleaned_data["file"] = self.compress(cleaned_data["file"])
             cleaned_data["filename"] = cleaned_data["filename"] + ".gz"
 

@@ -3,8 +3,8 @@ from io import BytesIO
 from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.urls import reverse
 from django.test import TestCase
+from django.urls import reverse
 from model_mommy.mommy import make
 
 
@@ -107,7 +107,7 @@ class TestUpload(TestCase):
             self.assertEqual(response.status_code, 415)
             self.assertEqual(
                 response.json()["error"]["filename"],
-                ["arquivo deve ser .CSV ou .CSV.GZIP!"],
+                ["arquivo deve ser .csv.gz!"],
             )
 
     @mock.patch("secret.models.send_mail")
@@ -240,7 +240,7 @@ class TestUpload(TestCase):
             schema=None,
         )
         secret.methods.add(mmap)
-        with open("api/tests/csv_example_semicolon.csv.gz", "rb") as file_:
+        with open("api/tests/csv_example.csv.gz", "rb") as file_:
             contents_md5 = md5(file_.read()).hexdigest()
             file_.seek(0)
             response = self.client.post(
