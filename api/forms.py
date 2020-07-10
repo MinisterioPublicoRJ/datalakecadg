@@ -132,7 +132,7 @@ class FileUploadForm(forms.Form):
         else:
             c_file = file_.file
 
-        return gzip.compress(c_file.getvalue())
+        return gzip.compress(c_file.read())
 
     def convert_to_csv(self, file_):
         wb = xlrd.open_workbook(file_contents=file_.read())
