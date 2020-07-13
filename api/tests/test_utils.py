@@ -1,18 +1,17 @@
 from hashlib import md5
 from unittest import mock
 
+from api.utils import (
+    get_destination,
+    is_data_valid,
+    md5reader,
+    read_csv_sample,
+    securedecorator,
+)
 from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 from model_mommy.mommy import make
-
-from api.utils import (
-    securedecorator,
-    md5reader,
-    is_data_valid,
-    get_destination,
-    read_csv_sample,
-)
 
 
 @securedecorator
@@ -86,8 +85,8 @@ class TestMd5Reader(TestCase):
 
 class TestValidHeader(TestCase):
     @mock.patch("secret.models.login")
-    def test_invalid_csd_NOT_comma_separated(self, _mail_login):
-        gzipped_file = open("api/tests/csv_example_semicolon.csv.gz", "rb")
+    def test_invalid_csd_NOT_comma_semicolon_separated(self, _mail_login):
+        gzipped_file = open("api/tests/csv_example.tsv", "rb")
         secret = make("secret.Secret", username="anyname")
         mmap = make(
             "methodmapping.MethodMapping",
