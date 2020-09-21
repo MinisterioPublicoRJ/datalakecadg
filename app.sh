@@ -10,7 +10,7 @@ refresh_kinit() {
     done
 }
 
-refresh_kinit &;
+refresh_kinit &
 sleep 1;
 
 gunicorn datalakecadg.wsgi:application --workers=12 --threads=2 --bind=0.0.0.0:8080 -t 180 --log-file -
