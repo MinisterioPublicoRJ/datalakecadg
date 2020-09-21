@@ -1,5 +1,4 @@
 from django.conf import settings
-from hdfs import InsecureClient
+from hdfs.ext.kerberos import KerberosClient
 
-
-hdfsclient = InsecureClient(settings.HDFS_URL, settings.HDFS_USER)
+hdfsclient = KerberosClient(settings.HDFS_URL)
