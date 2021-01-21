@@ -50,6 +50,9 @@
                  {{ field.label }} - {{ error }}
               {% endfor %}
            {% endfor %}
+          {% for error in form.non_field_errors %}
+              {{ error }}
+          {% endfor %}
         {% endif %}
         {% if 'schema' in form.errors %}
             <p>{{ form.errors.schema }}</p>
