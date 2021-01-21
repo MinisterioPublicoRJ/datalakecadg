@@ -362,7 +362,7 @@ class TestValidator(TestCase):
         }
 
         # Original filename is invalid
-        with open("api/tests/csv_example.xlsx", "rb") as file_:
+        with open("api/tests/assets/csv_example.xlsx", "rb") as file_:
             file_to_send = {"file": SimpleUploadedFile(filename, file_.read())}
         good_exts = (".xlsx",)
         form = FileUploadForm(
@@ -371,3 +371,32 @@ class TestValidator(TestCase):
         is_valid = form.is_valid()
 
         self.assertTrue(is_valid)
+
+    @mock.patch("api.forms.md5reader", return_value="md5 sum")
+    def test_xlsx_file_cant_have_more_than_one_sheet(self, _md5reader):
+        username = "anyname"
+        methodname = "cpf"
+
+        filename = "FILENAME.xlsx"
+        data = {
+            "nome": username,
+            "method": methodname,
+            "md5": "md5 sum",
+            "filename": filename,
+        }
+
+        # Original filename is invalid
+        with open("api/tests/assets/two_sheets.xlsx", "rb") as file_:
+            file_to_send = {"file": SimpleUploadedFile(filename, file_.read())}
+
+        good_exts = (".xlsx",)
+        form = FileUploadForm(
+            data=data, files=file_to_send, good_exts=good_exts
+        )
+        is_valid = form.is_valid()
+
+        self.assertFalse(is_valid)
+        self.assertEqual(
+            form.errors["__all__"][0],
+            "Os arquivos devem conter apenas uma aba. Verifique também as abas escondidas",
+        )
