@@ -81,7 +81,9 @@ class TestUpload(TestCase):
     @mock.patch("api.views.upload_to_hdfs")
     @mock.patch("secret.models.login")
     def test_validate_data_extension(self, _login, upload_to_hdfs, mm_added):
-        with open("api/tests/csv_example.tsv", "rt", newline="") as file_:
+        with open(
+            "api/tests/assets/csv_example.tsv", "rt", newline=""
+        ) as file_:
             contents_md5 = md5(file_.read().encode()).hexdigest()
             file_.seek(0)
 
@@ -116,7 +118,7 @@ class TestUpload(TestCase):
     def test_validate_sent_data_gzip(
         self, _login, upload_to_hdfs, mm_added,
     ):
-        with open("api/tests/csv_example.csv.gz", "rb") as file_:
+        with open("api/tests/assets/csv_example.csv.gz", "rb") as file_:
             contents_md5 = md5(file_.read()).hexdigest()
             file_.seek(0)
 
@@ -169,7 +171,9 @@ class TestUpload(TestCase):
             },
         )
         secret.methods.add(mmap)
-        with open("api/tests/csv_example_semicolon.csv.gz", "rb") as file_:
+        with open(
+            "api/tests/assets/csv_example_semicolon.csv.gz", "rb"
+        ) as file_:
             contents_md5 = md5(file_.read()).hexdigest()
             file_.seek(0)
             response = self.client.post(
@@ -208,7 +212,7 @@ class TestUpload(TestCase):
             },
         )
         secret.methods.add(mmap)
-        with open("api/tests/csv_example.csv.gz", "rb") as file_:
+        with open("api/tests/assets/csv_example.csv.gz", "rb") as file_:
             contents_md5 = md5(file_.read()).hexdigest()
             file_.seek(0)
             response = self.client.post(
@@ -240,7 +244,7 @@ class TestUpload(TestCase):
             schema=None,
         )
         secret.methods.add(mmap)
-        with open("api/tests/csv_example.csv.gz", "rb") as file_:
+        with open("api/tests/assets/csv_example.csv.gz", "rb") as file_:
             contents_md5 = md5(file_.read()).hexdigest()
             file_.seek(0)
             response = self.client.post(

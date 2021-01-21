@@ -362,7 +362,7 @@ class TestValidator(TestCase):
         }
 
         # Original filename is invalid
-        with open("api/tests/csv_example.xlsx", "rb") as file_:
+        with open("api/tests/assets/csv_example.xlsx", "rb") as file_:
             file_to_send = {"file": SimpleUploadedFile(filename, file_.read())}
         good_exts = (".xlsx",)
         form = FileUploadForm(
