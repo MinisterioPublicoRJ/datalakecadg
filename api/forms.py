@@ -136,6 +136,11 @@ class FileUploadForm(forms.Form):
 
     def convert_to_csv(self, file_):
         wb = xlrd.open_workbook(file_contents=file_.read())
+        if len(wb.sheets()) > 1:
+            raise forms.ValidationError(
+                "Os arquivos devem conter apenas uma aba. Verifique também as abas escondidas"
+            )
+
         sh = wb.sheet_by_index(0)
         output = StringIO()
         writer = csv.writer(output)
